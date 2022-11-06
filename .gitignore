@@ -1,5 +1,8 @@
+.coverage
 .pytest_cache/
 .vscode/
+build/
+target/
 venv/
 
 *.egg-info
