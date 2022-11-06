@@ -19,7 +19,11 @@ def empty_git_repo():
 def sample_project_1(empty_git_repo):
     this_dir = os.path.dirname(os.path.realpath(__file__))
     dest = empty_git_repo
-    shutil.copytree(os.path.join(this_dir, "resources", "sample_project_1"), dest, dirs_exist_ok=True)
+    shutil.copytree(
+        os.path.join(this_dir, "resources", "sample_project_1"),
+        dest,
+        dirs_exist_ok=True,
+    )
     repo = git.Repo(dest)
     repo.git.add(".")
     repo.git.commit("-m", "Initial commit")
@@ -34,16 +38,16 @@ def test_single_modified_file(sample_project_1):
     repo.git.commit("-m", "A commit")
 
     test_files = select_test_files(
-        ["HEAD~1..."], 
-        [os.path.join(sample_project_1, "test/")], 
-        [os.path.join(sample_project_1)], 
-        dir_name=sample_project_1
+        ["HEAD~1..."],
+        [os.path.join(sample_project_1, "test/")],
+        [os.path.join(sample_project_1)],
+        dir_name=sample_project_1,
     )
 
     assert test_files == set(
         (
-            os.path.join(sample_project_1, "test", "test_f.py"), 
-            os.path.join(sample_project_1, "test", "test_g.py")
+            os.path.join(sample_project_1, "test", "test_f.py"),
+            os.path.join(sample_project_1, "test", "test_g.py"),
         )
     )
 
@@ -56,17 +60,13 @@ def test_single_modified_file_2(sample_project_1):
     repo.git.commit("-m", "A commit")
 
     test_files = select_test_files(
-        ["HEAD~1..."], 
-        [os.path.join(sample_project_1, "test/")], 
-        [os.path.join(sample_project_1)], 
-        dir_name=sample_project_1
+        ["HEAD~1..."],
+        [os.path.join(sample_project_1, "test/")],
+        [os.path.join(sample_project_1)],
+        dir_name=sample_project_1,
     )
 
-    assert test_files == set(
-        (
-            os.path.join(sample_project_1, "test", "test_g.py"),
-        )
-    )
+    assert test_files == set((os.path.join(sample_project_1, "test", "test_g.py"),))
 
 
 def test_single_deleted_file(sample_project_1):
@@ -76,15 +76,15 @@ def test_single_deleted_file(sample_project_1):
     repo.git.commit("-m", "A commit")
 
     test_files = select_test_files(
-        ["HEAD~1..."], 
-        [os.path.join(sample_project_1, "test/")], 
-        [os.path.join(sample_project_1)], 
-        dir_name=sample_project_1
+        ["HEAD~1..."],
+        [os.path.join(sample_project_1, "test/")],
+        [os.path.join(sample_project_1)],
+        dir_name=sample_project_1,
     )
 
     assert test_files == set(
         (
-            os.path.join(sample_project_1, "test", "test_f.py"), 
-            os.path.join(sample_project_1, "test", "test_g.py")
+            os.path.join(sample_project_1, "test", "test_f.py"),
+            os.path.join(sample_project_1, "test", "test_g.py"),
         )
     )
