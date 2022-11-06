@@ -58,7 +58,7 @@ def _create_import_graph(
     # Restore the deleted files temporarily to resolve any import issues that may arise from deleting them
     try:
         for deleted_file in deleted_files:
-            open(deleted_file, "w+")
+            open(deleted_file, "w+").close()
 
         import_graph = graph.ImportGraph.create(env, test_filenames, True)
     finally:
