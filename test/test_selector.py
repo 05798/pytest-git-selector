@@ -12,6 +12,8 @@ def empty_git_repo():
     with tempfile.TemporaryDirectory() as temp_dir:
         g = git.cmd.Git(temp_dir)
         g.init()
+        g.config("--local", "user.name", "test")
+        g.config("--local", "user.email", "test@email.com")
         yield temp_dir
 
 
