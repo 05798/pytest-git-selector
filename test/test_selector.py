@@ -30,50 +30,39 @@ def sample_project_1(empty_git_repo):
     return dest
 
 
-def test_single_modified_file(sample_project_1):
-    repo = git.Repo(sample_project_1)
-    with open(os.path.join(sample_project_1, "sample_project_1", "f.py"), "a+") as f:
+def modify_f_sample_project_1(project_root_dir):
+    repo = git.Repo(project_root_dir)
+    with open(os.path.join(project_root_dir, "sample_project_1", "f.py"), "a+") as f:
         f.write("\n# a comment")
     repo.git.add(".")
-    repo.git.commit("-m", "A commit")
-
-    test_files = select_test_files(
-        ["HEAD~1..."],
-        [os.path.join(sample_project_1, "test/")],
-        [os.path.join(sample_project_1)],
-        dir_name=sample_project_1,
-    )
-
-    assert test_files == set(
-        (
-            os.path.join(sample_project_1, "test", "test_f.py"),
-            os.path.join(sample_project_1, "test", "test_g.py"),
-        )
-    )
+    repo.git.commit("-m", "Modify f")
 
 
-def test_single_modified_file_2(sample_project_1):
-    repo = git.Repo(sample_project_1)
-    with open(os.path.join(sample_project_1, "sample_project_1", "g.py"), "a+") as f:
+def modify_g_sample_project_1(project_root_dir):
+    repo = git.Repo(project_root_dir)
+    with open(os.path.join(project_root_dir, "sample_project_1", "g.py"), "a+") as f:
         f.write("\n# a comment")
     repo.git.add(".")
-    repo.git.commit("-m", "A commit")
-
-    test_files = select_test_files(
-        ["HEAD~1..."],
-        [os.path.join(sample_project_1, "test/")],
-        [os.path.join(sample_project_1)],
-        dir_name=sample_project_1,
-    )
-
-    assert test_files == set((os.path.join(sample_project_1, "test", "test_g.py"),))
+    repo.git.commit("-m", "Modify g")
 
 
-def test_single_deleted_file(sample_project_1):
-    repo = git.Repo(sample_project_1)
-    os.remove(os.path.join(sample_project_1, "sample_project_1", "f.py"))
+def delete_f_sample_project_1(project_root_dir):
+    repo = git.Repo(project_root_dir)
+    os.remove(os.path.join(project_root_dir, "sample_project_1", "f.py"))
     repo.git.add(".")
-    repo.git.commit("-m", "A commit")
+    repo.git.commit("-m", "Delete f")
+
+
+@pytest.mark.parametrize(
+    ("side_effect", "expected"), 
+    [
+        (modify_f_sample_project_1, {"test/test_f.py", "test/test_g.py"}), 
+        (modify_g_sample_project_1, {"test/test_g.py"}), 
+        (delete_f_sample_project_1, {"test/test_f.py", "test/test_g.py"})
+    ]
+)
+def test_single_commit_change(sample_project_1, side_effect, expected):
+    side_effect(sample_project_1)
 
     test_files = select_test_files(
         ["HEAD~1..."],
@@ -82,9 +71,7 @@ def test_single_deleted_file(sample_project_1):
         dir_name=sample_project_1,
     )
 
-    assert test_files == set(
-        (
-            os.path.join(sample_project_1, "test", "test_f.py"),
-            os.path.join(sample_project_1, "test", "test_g.py"),
-        )
-    )
+    # Expected must be in absolute paths
+    expected = set(os.path.join(sample_project_1, p) for p in expected)
+
+    assert test_files == expected
