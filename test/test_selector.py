@@ -12,6 +12,8 @@ def empty_git_repo():
     with tempfile.TemporaryDirectory() as temp_dir:
         g = git.cmd.Git(temp_dir)
         g.init()
+        g.config("--local", "user.name", "test")
+        g.config("--local", "user.email", "test@email.com")
         yield temp_dir
 
 
@@ -54,12 +56,12 @@ def delete_f_sample_project_1(project_root_dir):
 
 
 @pytest.mark.parametrize(
-    ("side_effect", "expected"), 
+    ("side_effect", "expected"),
     [
-        (modify_f_sample_project_1, {"test/test_f.py", "test/test_g.py"}), 
-        (modify_g_sample_project_1, {"test/test_g.py"}), 
-        (delete_f_sample_project_1, {"test/test_f.py", "test/test_g.py"})
-    ]
+        (modify_f_sample_project_1, {"test/test_f.py", "test/test_g.py"}),
+        (modify_g_sample_project_1, {"test/test_g.py"}),
+        (delete_f_sample_project_1, {"test/test_f.py", "test/test_g.py"}),
+    ],
 )
 def test_single_commit_change(sample_project_1, side_effect, expected):
     side_effect(sample_project_1)
