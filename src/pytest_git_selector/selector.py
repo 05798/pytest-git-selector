@@ -16,7 +16,10 @@ def select_test_files(
     dir_name: str = ".",
 ) -> MutableSet[str]:
     repo = git.Repo(dir_name)
-    diff_files = repo.git.diff("--name-only", *git_diff_args).split("\n")
+
+    # Use --no-renames treats renames as an deletion of the pre-rename file and addition of the post-rename file
+    # This is easier to deal with in terms of analyzing the dependencies
+    diff_files = repo.git.diff("--name-only", "--no-renames", *git_diff_args).split("\n")
     py_diff_files = utils.expand_source_files(
         set(f for f in diff_files if f.endswith(".py")), dir_name
     )
@@ -43,7 +46,7 @@ def _create_import_graph(
     repo = git.Repo(dir_name)
 
     deleted_files_output = repo.git.diff(
-        "--name-only", "--diff-filter=D", *git_diff_args
+        "--name-only", "--diff-filter=D", "--no-renames", *git_diff_args
     )
     deleted_files_relative_path = (
         deleted_files_output.split("\n") if deleted_files_output else []
