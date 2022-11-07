@@ -51,6 +51,16 @@ def modify_f_small_project_a(project_root_dir):
     repo.git.commit("-m", "Modify f.py")
 
 
+def rename_f_small_project_a(project_root_dir):
+    repo = git.Repo(project_root_dir)
+    os.rename(
+        os.path.join(project_root_dir, "small_project_a", "f.py"), 
+        os.path.join(project_root_dir, "small_project_a", "f_2.py")
+    )
+    repo.git.add(".")
+    repo.git.commit("-m", "Rename f.py to f_2.py")
+
+
 def modify_g_small_project_a(project_root_dir):
     repo = git.Repo(project_root_dir)
     with open(os.path.join(project_root_dir, "small_project_a", "g.py"), "a+") as f:
@@ -152,4 +162,49 @@ def complex_workflow_a_medium_project_a(project_root_dir):
 
 def complex_workflow_a_medium_project_a_feature_1(project_root_dir):
     complex_workflow_a_medium_project_a(project_root_dir)
+    git.Repo(project_root_dir).git.checkout("feature-1")
+
+
+def complex_workflow_b_medium_project_a(project_root_dir):
+    repo = git.Repo(project_root_dir)
+    repo.git.checkout(
+        "-b", "base"
+    )  # So we don't have to deduce whether it is main/master branch
+    repo.git.checkout("-b", "feature-1")
+
+    os.rename(
+        os.path.join(project_root_dir, "src", "b", "b_1.py"),
+        os.path.join(project_root_dir, "src", "b", "b_1a.py")
+    )
+
+    repo.git.add(".")
+    repo.git.commit("-m", "Rename b_1.py to b_1a.py")
+
+    repo.git.checkout("-b", "feature-2")
+    repo.git.checkout("feature-1")
+
+    with open(os.path.join(project_root_dir, "src", "c", "c_2.py"), "a+") as c_2:
+        c_2.write("# c_2.py complex_workflow_b_medium_project_a\n")
+
+    repo.git.add(".")
+    repo.git.commit("-m", "Modify c_2.py")
+
+    os.rename(
+        os.path.join(project_root_dir, "src", "a", "a_2.py"),
+        os.path.join(project_root_dir, "src", "a", "a_2a.py")
+    )
+
+    repo.git.add(".")
+    repo.git.commit("-m", "Rename a_2.py to a_2a.py")
+
+    repo.git.checkout("feature-2")
+
+    os.remove(os.path.join(project_root_dir, "src", "a", "a_1.py"))
+
+    repo.git.add(".")
+    repo.git.commit("-m", "Delete a_1.py")
+
+
+def complex_workflow_b_medium_project_a_feature_1(project_root_dir):
+    complex_workflow_b_medium_project_a(project_root_dir)
     git.Repo(project_root_dir).git.checkout("feature-1")
