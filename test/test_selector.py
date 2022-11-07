@@ -18,11 +18,11 @@ def empty_git_repo():
 
 
 @pytest.fixture
-def sample_project_1(empty_git_repo):
+def small_project_a(empty_git_repo):
     this_dir = os.path.dirname(os.path.realpath(__file__))
     dest = empty_git_repo
     shutil.copytree(
-        os.path.join(this_dir, "resources", "sample_project_1"),
+        os.path.join(this_dir, "resources", "small_project_a"),
         dest,
         dirs_exist_ok=True,
     )
@@ -32,48 +32,62 @@ def sample_project_1(empty_git_repo):
     return dest
 
 
-def modify_f_sample_project_1(project_root_dir):
+def modify_f_small_project_a(project_root_dir):
     repo = git.Repo(project_root_dir)
-    with open(os.path.join(project_root_dir, "sample_project_1", "f.py"), "a+") as f:
-        f.write("\n# a comment")
+    with open(os.path.join(project_root_dir, "small_project_a", "f.py"), "a+") as f:
+        f.write("# a comment\n")
     repo.git.add(".")
     repo.git.commit("-m", "Modify f")
 
 
-def modify_g_sample_project_1(project_root_dir):
+def modify_g_small_project_a(project_root_dir):
     repo = git.Repo(project_root_dir)
-    with open(os.path.join(project_root_dir, "sample_project_1", "g.py"), "a+") as f:
-        f.write("\n# a comment")
+    with open(os.path.join(project_root_dir, "small_project_a", "g.py"), "a+") as f:
+        f.write("# a comment\n")
     repo.git.add(".")
     repo.git.commit("-m", "Modify g")
 
 
-def delete_f_sample_project_1(project_root_dir):
+def delete_f_small_project_a(project_root_dir):
     repo = git.Repo(project_root_dir)
-    os.remove(os.path.join(project_root_dir, "sample_project_1", "f.py"))
+    os.remove(os.path.join(project_root_dir, "small_project_a", "f.py"))
     repo.git.add(".")
     repo.git.commit("-m", "Delete f")
 
 
+def add_h_small_project_a(project_root_dir):
+    repo = git.Repo(project_root_dir)
+    with open(os.path.join(project_root_dir, "small_project_a", "h.py"), "w+") as h:
+        h.write("pass\n")
+    with open(os.path.join(project_root_dir, "test", "test_h.py"), "w+") as h:
+        h.write("import small_project_a.h\n")
+    with open(os.path.join(project_root_dir, "small_project_a", "g.py"), "a+") as g:
+        g.write("import small_project_a.h")
+    repo.git.add(".")
+    repo.git.commit("-m", "Add h. Import h from g")
+
+
 @pytest.mark.parametrize(
-    ("side_effect", "expected"),
+    ("repo", "side_effect", "git_diff_args", "test_paths", "python_paths", "expected"),
     [
-        (modify_f_sample_project_1, {"test/test_f.py", "test/test_g.py"}),
-        (modify_g_sample_project_1, {"test/test_g.py"}),
-        (delete_f_sample_project_1, {"test/test_f.py", "test/test_g.py"}),
+        ("small_project_a", modify_f_small_project_a, ["HEAD~1..."], ["test"], ["."], {"test/test_f.py", "test/test_g.py"}),
+        ("small_project_a", modify_g_small_project_a, ["HEAD~1..."], ["test"], ["."], {"test/test_g.py"}),
+        ("small_project_a", delete_f_small_project_a, ["HEAD~1..."], ["test"], ["."], {"test/test_f.py", "test/test_g.py"}),
+        ("small_project_a", add_h_small_project_a, ["HEAD~1..."], ["test"], ["."], {"test/test_g.py", "test/test_h.py"}),
     ],
 )
-def test_single_commit_change(sample_project_1, side_effect, expected):
-    side_effect(sample_project_1)
+def test_select_test_files(repo, side_effect, git_diff_args, test_paths, python_paths, expected, request):
+    repo_path = request.getfixturevalue(repo)
+    side_effect(repo_path)
 
     test_files = select_test_files(
-        ["HEAD~1..."],
-        [os.path.join(sample_project_1, "test/")],
-        [os.path.join(sample_project_1)],
-        dir_name=sample_project_1,
+        git_diff_args,
+        [os.path.join(repo_path, p) for p in test_paths],
+        [os.path.join(repo_path, p) for p in python_paths],
+        dir_name=repo_path,
     )
 
     # Expected must be in absolute paths
-    expected = set(os.path.join(sample_project_1, p) for p in expected)
+    expected = set(os.path.join(repo_path, p) for p in expected)
 
     assert test_files == expected
