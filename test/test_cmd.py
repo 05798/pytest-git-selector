@@ -4,19 +4,12 @@ import pytest
 import subprocess
 
 from conftest import (
-    add_h_small_project_a, 
-    b_2_depends_on_a_2_medium_project_a, 
-    complex_workflow_a_medium_project_a, 
-    complex_workflow_a_medium_project_a_feature_1, 
-    delete_f_small_project_a, 
-    modify_f_small_project_a, 
-    modify_g_small_project_a, 
-    modify_b_1_medium_project_a
+    complex_workflow_a_medium_project_a,
+    modify_f_small_project_a,
 )
 
 logging.basicConfig(level=logging.INFO)
 _logger = logging.getLogger()
-
 
 
 # To run these tests, you will need to install the package in editable mode so that subprocess can use the entry point
@@ -26,9 +19,9 @@ _logger = logging.getLogger()
         (
             "small_project_a",
             modify_f_small_project_a,
-            ".", 
-            ["test"], 
-            ["."], 
+            ".",
+            ["test"],
+            ["."],
             ["HEAD~1..."],
             {"test/test_f.py", "test/test_g.py"},
         ),
@@ -38,7 +31,7 @@ _logger = logging.getLogger()
             ".",
             ["test"],
             ["src"],
-            ["base..."], 
+            ["base..."],
             {
                 "test/test_a/test_a_1.py",
                 "test/test_a/test_a_2.py",
@@ -56,25 +49,32 @@ _logger = logging.getLogger()
             ".",
             ["fake"],
             ["fake"],
-            ["HEAD~1..."], 
+            ["HEAD~1..."],
             set(),
         ),
-    ]
+    ],
 )
-def test_command_line(repo, side_effect, dir_, test_path, src_path, subargs, expected, request):
+def test_command_line(
+    repo, side_effect, dir_, test_path, src_path, subargs, expected, request
+):
     repo_path = request.getfixturevalue(repo)
     side_effect(repo_path)
 
     # Note paths are specified relative to repo_path since repo_path is not known beforehand
     dir_ = os.path.join(repo_path, dir_)
-    test_path =[os.path.join(repo_path, p) for p in test_path]
+    test_path = [os.path.join(repo_path, p) for p in test_path]
     src_path = [os.path.join(repo_path, p) for p in src_path]
 
     test_path_args = sum(zip(["--test-path"] * len(test_path), test_path), ())
     src_path_args = sum(zip(["--src-path"] * len(src_path), src_path), ())
 
     try:
-        output = subprocess.check_output(["git-select-tests", "--dir", dir_] + list(test_path_args) + list(src_path_args) + subargs)
+        output = subprocess.check_output(
+            ["git-select-tests", "--dir", dir_]
+            + list(test_path_args)
+            + list(src_path_args)
+            + subargs
+        )
     except subprocess.CalledProcessError as cpe:
         _logger.error(f"Exit code {cpe.returncode} : {cpe.output}")
         assert False
