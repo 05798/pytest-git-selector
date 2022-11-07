@@ -4,14 +4,14 @@ import pytest
 
 from pytest_git_selector.selector import select_test_files
 from conftest import (
-    add_h_small_project_a, 
-    b_2_depends_on_a_2_medium_project_a, 
-    complex_workflow_a_medium_project_a, 
-    complex_workflow_a_medium_project_a_feature_1, 
-    delete_f_small_project_a, 
-    modify_f_small_project_a, 
-    modify_g_small_project_a, 
-    modify_b_1_medium_project_a
+    add_h_small_project_a,
+    b_2_depends_on_a_2_medium_project_a,
+    complex_workflow_a_medium_project_a,
+    complex_workflow_a_medium_project_a_feature_1,
+    delete_f_small_project_a,
+    modify_f_small_project_a,
+    modify_g_small_project_a,
+    modify_b_1_medium_project_a,
 )
 
 
