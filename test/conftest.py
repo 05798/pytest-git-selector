@@ -54,8 +54,8 @@ def modify_f_small_project_a(project_root_dir):
 def rename_f_small_project_a(project_root_dir):
     repo = git.Repo(project_root_dir)
     os.rename(
-        os.path.join(project_root_dir, "small_project_a", "f.py"), 
-        os.path.join(project_root_dir, "small_project_a", "f_2.py")
+        os.path.join(project_root_dir, "small_project_a", "f.py"),
+        os.path.join(project_root_dir, "small_project_a", "f_2.py"),
     )
     repo.git.add(".")
     repo.git.commit("-m", "Rename f.py to f_2.py")
@@ -174,7 +174,7 @@ def complex_workflow_b_medium_project_a(project_root_dir):
 
     os.rename(
         os.path.join(project_root_dir, "src", "b", "b_1.py"),
-        os.path.join(project_root_dir, "src", "b", "b_1a.py")
+        os.path.join(project_root_dir, "src", "b", "b_1a.py"),
     )
 
     repo.git.add(".")
@@ -191,7 +191,7 @@ def complex_workflow_b_medium_project_a(project_root_dir):
 
     os.rename(
         os.path.join(project_root_dir, "src", "a", "a_2.py"),
-        os.path.join(project_root_dir, "src", "a", "a_2a.py")
+        os.path.join(project_root_dir, "src", "a", "a_2a.py"),
     )
 
     repo.git.add(".")

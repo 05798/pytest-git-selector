@@ -19,7 +19,9 @@ def select_test_files(
 
     # Use --no-renames treats renames as an deletion of the pre-rename file and addition of the post-rename file
     # This is easier to deal with in terms of analyzing the dependencies
-    diff_files = repo.git.diff("--name-only", "--no-renames", *git_diff_args).split("\n")
+    diff_files = repo.git.diff("--name-only", "--no-renames", *git_diff_args).split(
+        "\n"
+    )
     py_diff_files = utils.expand_source_files(
         set(f for f in diff_files if f.endswith(".py")), dir_name
     )
