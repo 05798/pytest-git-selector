@@ -8,13 +8,18 @@ from pytest_git_selector.selector import select_test_files
 
 
 @pytest.fixture
-def empty_git_repo():
+def empty_repo():
     with tempfile.TemporaryDirectory() as temp_dir:
-        g = git.cmd.Git(temp_dir)
-        g.init()
-        g.config("--local", "user.name", "test")
-        g.config("--local", "user.email", "test@email.com")
         yield temp_dir
+
+
+@pytest.fixture
+def empty_git_repo(empty_repo):
+    g = git.cmd.Git(empty_repo)
+    g.init()
+    g.config("--local", "user.name", "test")
+    g.config("--local", "user.email", "test@email.com")
+    return empty_repo
 
 
 def initialize_resource_repo(dest, resource_repo):
@@ -249,6 +254,30 @@ def complex_workflow_a_medium_project_a_feature_1(project_root_dir):
                 "test/test_d/test_d_1.py",
             },
         ),
+        (
+            "small_project_a",
+            modify_f_small_project_a,
+            [],
+            [],
+            [],
+            set(),
+        ),
+        (
+            "small_project_a",
+            modify_f_small_project_a,
+            ["HEAD~1..."],
+            [],
+            [],
+            set(),
+        ),
+        (
+            "empty_repo",
+            lambda x: None,
+            ["HEAD~1..."],
+            [],
+            [],
+            git.InvalidGitRepositoryError,
+        ),
     ],
 )
 def test_select_test_files(
@@ -257,14 +286,23 @@ def test_select_test_files(
     repo_path = request.getfixturevalue(repo)
     side_effect(repo_path)
 
-    test_files = select_test_files(
-        git_diff_args,
-        [os.path.join(repo_path, p) for p in test_paths],
-        [os.path.join(repo_path, p) for p in python_paths],
-        dir_name=repo_path,
-    )
+    if issubclass(expected, Exception):
+        with pytest.raises(expected):
+            select_test_files(
+                git_diff_args,
+                [os.path.join(repo_path, p) for p in test_paths],
+                [os.path.join(repo_path, p) for p in python_paths],
+                dir_name=repo_path,
+            )
+    else:
+        test_files = select_test_files(
+            git_diff_args,
+            [os.path.join(repo_path, p) for p in test_paths],
+            [os.path.join(repo_path, p) for p in python_paths],
+            dir_name=repo_path,
+        )
 
-    # Expected must be in absolute paths
-    expected = set(os.path.join(repo_path, p) for p in expected)
+        # Expected must be in absolute paths
+        expected = set(os.path.join(repo_path, p) for p in expected)
 
-    assert test_files == expected
+        assert test_files == expected
