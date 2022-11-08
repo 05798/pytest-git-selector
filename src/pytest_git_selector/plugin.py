@@ -1,11 +1,11 @@
 import pytest
 import pytest_git_selector.selector
-import sys
 
 
 def pytest_addoption(parser):
     group = parser.getgroup("pytest-git-selector")
     group.addoption("--git-diff-args", nargs="*", help="args to pass to git diff")
+    group.addoption("--src-path", action="append", help="args to pass to git diff", default=[".", "./src/"])
 
 
 @pytest.hookimpl()
@@ -17,7 +17,7 @@ def pytest_collection_modifyitems(session, config, items):
         selected_items = pytest_git_selector.selector.select_test_files(
             git_diff_args,
             all_test_files,
-            sys.path,  # Invoking interpreter should have the repository src in its PYTHONPATH
+            config.getoption("--src-path"),  
             str(session.startpath),
         )
 
