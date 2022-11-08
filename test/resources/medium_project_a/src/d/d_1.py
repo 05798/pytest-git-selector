@@ -1,2 +1,5 @@
 import b.b_2
-from c import *
+
+
+if __name__ == "__main__":
+    from c import *
