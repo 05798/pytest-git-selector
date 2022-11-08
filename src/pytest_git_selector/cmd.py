@@ -28,9 +28,14 @@ def parse_args():
         action="append",
     )
     parser.add_argument(
-        "subargs",
+        "git-diff-args",
         nargs=argparse.REMAINDER,
-        help='Arguments to pass to git diff command. Note that "--name-only" will automatically be included',
+        help=(
+            "args to pass to git diff. "
+            "git diff is called internally with the --name-only and --no-renames automatically. "
+            "Any additional arguments must not interfere with the output format e.g. do not use the --output flag " 
+            "which writes to a file instead of stdout"
+        ), 
     )
     return parser.parse_args()
 
@@ -39,7 +44,7 @@ def main():
     args = parse_args()
 
     required_test_files = pytest_git_selector.selector.select_test_files(
-        args.subargs, args.test_path, args.src_path, dir_name=args.dir
+        vars(args)["git-diff-args"], args.test_path, args.src_path, dir_name=args.dir
     )
 
     print("\n".join(required_test_files))
