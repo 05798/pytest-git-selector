@@ -11,13 +11,19 @@ def parse_args():
     )
     parser.add_argument(
         "--test-path",
-        help="path of a test file or directory containing test files. These are relative to the current working directory not the directory specified in '--dir'",
+        help=(
+            "path of a test file or directory containing test files. "
+            "These are relative to the current working directory not the directory specified in '--dir'"
+        ),
         required=True,
         action="append",
     )
     parser.add_argument(
         "--src-path",
-        help="path of directory containing source files for the project. These are relative to the current working directory not the directory specified in '--dir'",
+        help=(
+            "path of directory containing source files for the project. "
+            "These are relative to the current working directory not the directory specified in '--dir'"
+        ),
         required=True,
         action="append",
     )
