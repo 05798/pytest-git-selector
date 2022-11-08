@@ -33,9 +33,9 @@ def parse_args():
         help=(
             "args to pass to git diff. "
             "git diff is called internally with the --name-only and --no-renames automatically. "
-            "Any additional arguments must not interfere with the output format e.g. do not use the --output flag " 
+            "Any additional arguments must not interfere with the output format e.g. do not use the --output flag "
             "which writes to a file instead of stdout"
-        ), 
+        ),
     )
     return parser.parse_args()
 

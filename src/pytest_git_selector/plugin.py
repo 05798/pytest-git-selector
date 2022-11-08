@@ -11,12 +11,14 @@ def pytest_addoption(parser):
         help=(
             "args to pass to git diff. "
             "git diff is called internally with the --name-only and --no-renames automatically. "
-            "Any additional arguments must not interfere with the output format e.g. do not use the --output flag " 
+            "Any additional arguments must not interfere with the output format e.g. do not use the --output flag "
             "which writes to a file instead of stdout"
-        ), 
+        ),
         default=[".", "./src/"],
     )
-    group.addoption("--git-diff-args", nargs=argparse.REMAINDER, help="args to pass to git diff")
+    group.addoption(
+        "--git-diff-args", nargs=argparse.REMAINDER, help="args to pass to git diff"
+    )
 
 
 @pytest.hookimpl()
