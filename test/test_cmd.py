@@ -1,20 +1,20 @@
-import logging
+import contextlib
+import io
 import os
 import pytest
-import subprocess
+import pytest_git_selector.cmd
+import sys
 
 from conftest import (
     complex_workflow_a_medium_project_a,
     modify_f_small_project_a,
+    modify_f_1_txt_small_project_b,
 )
-
-logging.basicConfig(level=logging.INFO)
-_logger = logging.getLogger()
 
 
 # To run these tests, you will need to install the package in editable mode so that subprocess can use the entry point
 @pytest.mark.parametrize(
-    ("repo", "side_effect", "dir_", "test_path", "src_path", "subargs", "expected"),
+    ("repo", "side_effect", "dir_", "test_path", "src_path", "extra_deps_file", "git_diff_args", "expected"),
     [
         (
             "small_project_a",
@@ -22,6 +22,7 @@ _logger = logging.getLogger()
             ".",
             ["test"],
             ["."],
+            None,
             ["HEAD~1..."],
             {"test/test_f.py", "test/test_g.py"},
         ),
@@ -31,8 +32,19 @@ _logger = logging.getLogger()
             ".",
             ["test"],
             ["."],
+            None,
             ["HEAD~1...", "--diff-filter=m"],
-            {},
+            set(),
+        ),
+        (
+            "small_project_b",
+            modify_f_1_txt_small_project_b,
+            ".", 
+            ["test"],
+            ["."],
+            "extra_deps.txt",
+            ["HEAD~1..."],
+            {"test/test_f.py", "test/test_g.py", "test/test_h.py"},
         ),
         (
             "medium_project_a",
@@ -40,6 +52,7 @@ _logger = logging.getLogger()
             ".",
             ["test"],
             ["src"],
+            None,
             ["base..."],
             {
                 "test/test_a/test_a_1.py",
@@ -58,13 +71,14 @@ _logger = logging.getLogger()
             ".",
             ["fake"],
             ["fake"],
+            None,
             ["HEAD~1..."],
             set(),
         ),
     ],
 )
 def test_command_line(
-    repo, side_effect, dir_, test_path, src_path, subargs, expected, request
+    repo, side_effect, dir_, test_path, src_path, extra_deps_file, git_diff_args, expected, request, monkeypatch
 ):
     repo_path = request.getfixturevalue(repo)
     side_effect(repo_path)
@@ -73,23 +87,39 @@ def test_command_line(
     dir_ = os.path.join(repo_path, dir_)
     test_path = [os.path.join(repo_path, p) for p in test_path]
     src_path = [os.path.join(repo_path, p) for p in src_path]
+    
+    if extra_deps_file:
+        extra_deps_file = os.path.join(repo_path, extra_deps_file)
 
-    test_path_args = sum(zip(["--test-path"] * len(test_path), test_path), ())
-    src_path_args = sum(zip(["--src-path"] * len(src_path), src_path), ())
+    dir_args = ["--dir", dir_]
+    test_path_args = list(sum(zip(["--test-path"] * len(test_path), test_path), ()))
+    src_path_args = list(sum(zip(["--src-path"] * len(src_path), src_path), ()))
+    extra_deps_file_arg = ["--extra-deps-file", extra_deps_file] if extra_deps_file else []
 
-    try:
-        output = subprocess.check_output(
-            ["git-select-tests", "--dir", dir_]
-            + list(test_path_args)
-            + list(src_path_args)
-            + subargs
-        )
-    except subprocess.CalledProcessError as cpe:
-        _logger.error(f"Exit code {cpe.returncode} : {cpe.output}")
-        assert False
+    cmd = (
+        ["git-select-tests"] +
+        dir_args + 
+        test_path_args +
+        src_path_args + 
+        extra_deps_file_arg + 
+        git_diff_args
+    )
+
+    with monkeypatch.context() as m:
+        m.setattr(sys, 'argv', cmd)
+        f = io.StringIO()
+
+        with contextlib.redirect_stdout(f):
+            assert pytest_git_selector.cmd.main() == 0
+
+        f.seek(0)
 
     # Expected must be in absolute paths
     expected = set(os.path.join(repo_path, p) for p in expected)
-    actual = set(output.decode().strip().split("\n")) if output.strip() else set()
+
+    if (output := "".join(f.readlines())).strip():
+        actual = set(output.strip().split("\n"))
+    else:
+        actual = set()
 
     assert actual == expected
