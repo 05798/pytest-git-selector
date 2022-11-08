@@ -20,6 +20,13 @@ from conftest import (
             {"passed": 1, "deselected": 1},
         ),
         (
+            "small_project_a",
+            modify_f_small_project_a,
+            ["HEAD~1...", "--diff-filter=m"],
+            ["."],
+            {"passed": 0, "deselected": 2},
+        ),
+        (
             "medium_project_a",
             complex_workflow_a_medium_project_a,
             ["base..."],
@@ -45,7 +52,8 @@ def test_plugin(
     src_path_args = sum(zip(["--src-path"] * len(src_path), src_path), ())
 
     result = pytester.runpytest(
-        *(list(src_path_args) + ["--git-diff-args"] + git_diff_args)
+        f"--basetemp={pytester.path.parent.joinpath('basetemp')}",
+        *(list(src_path_args) + ["--git-diff-args"] + git_diff_args),
     )
 
     result.assert_outcomes(**expected_outcomes)

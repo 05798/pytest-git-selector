@@ -26,6 +26,15 @@ _logger = logging.getLogger()
             {"test/test_f.py", "test/test_g.py"},
         ),
         (
+            "small_project_a",
+            modify_f_small_project_a,
+            ".",
+            ["test"],
+            ["."],
+            ["HEAD~1...", "--diff-filter=m"],
+            {},
+        ),
+        (
             "medium_project_a",
             complex_workflow_a_medium_project_a,
             ".",
