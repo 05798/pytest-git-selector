@@ -49,6 +49,7 @@ def small_project_a(empty_git_repo):
     │g/g.py│
     └──────┘
 
+    Diagram generated at: https://arthursonzogni.com/Diagon/#GraphDAG
     """
     return initialize_resource_repo(empty_git_repo, "small_project_a")
 
@@ -81,6 +82,7 @@ def medium_project_a(empty_git_repo):
     │src/a/a_2.py││src/a/a_1.py││src/b/b_1.py│
     └────────────┘└────────────┘└────────────┘
 
+    Diagram generated at: https://arthursonzogni.com/Diagon/#GraphDAG
     """
 
     return initialize_resource_repo(empty_git_repo, "medium_project_a")
