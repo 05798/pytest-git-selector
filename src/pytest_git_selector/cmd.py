@@ -61,7 +61,11 @@ def main():
         extra_deps = None
 
     required_test_files = select_test_files(
-        vars(args)["git-diff-args"], args.test_path, args.src_path, dir_name=args.dir, extra_deps=extra_deps
+        vars(args)["git-diff-args"],
+        args.test_path,
+        args.src_path,
+        dir_name=args.dir,
+        extra_deps=extra_deps,
     )
 
     print("\n".join(required_test_files))

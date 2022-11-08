@@ -39,9 +39,7 @@ def pytest_collection_modifyitems(session, config, items):
 
     if git_diff_args := config.getoption("--git-diff-args"):
         if extra_deps_filename := config.getoption("--extra-deps-file"):
-            extra_deps = parse_extra_deps_file(
-                extra_deps_filename
-            )
+            extra_deps = parse_extra_deps_file(extra_deps_filename)
         else:
             extra_deps = None
 

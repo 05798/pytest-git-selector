@@ -10,15 +10,22 @@ from conftest import (
 
 
 @pytest.mark.parametrize(
-    ("repo", "side_effect", "src_path", "extra_deps_file", "git_diff_args", "expected_outcomes"),
+    (
+        "repo",
+        "side_effect",
+        "src_path",
+        "extra_deps_file",
+        "git_diff_args",
+        "expected_outcomes",
+    ),
     [
         (
-            "small_project_a", 
-            modify_f_small_project_a, 
-            ["."], 
-            None, 
-            ["HEAD~1"], 
-            {"passed": 2}
+            "small_project_a",
+            modify_f_small_project_a,
+            ["."],
+            None,
+            ["HEAD~1"],
+            {"passed": 2},
         ),
         (
             "small_project_a",
@@ -58,7 +65,14 @@ from conftest import (
     ],
 )
 def test_plugin(
-    repo, side_effect, src_path, extra_deps_file, git_diff_args, expected_outcomes, pytester, request
+    repo,
+    side_effect,
+    src_path,
+    extra_deps_file,
+    git_diff_args,
+    expected_outcomes,
+    pytester,
+    request,
 ):
     repo_path = request.getfixturevalue(repo)
     os.chdir(repo_path)
@@ -80,11 +94,7 @@ def test_plugin(
 
     result = pytester.runpytest(
         f"--basetemp={pytester.path.parent.joinpath('basetemp')}",
-        *(
-            src_path_args + 
-            extra_deps_file_args + 
-            git_diff_args_w_flag
-        ),
+        *(src_path_args + extra_deps_file_args + git_diff_args_w_flag),
     )
 
     result.assert_outcomes(**expected_outcomes)

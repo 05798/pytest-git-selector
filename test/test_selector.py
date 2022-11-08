@@ -13,15 +13,23 @@ from conftest import (
     delete_f_small_project_a,
     modify_b_1_medium_project_a,
     modify_f_small_project_a,
-    modify_f_1_txt_small_project_b, 
+    modify_f_1_txt_small_project_b,
     modify_g_small_project_a,
-    modify_h_test_inputs_and_g_small_project_b, 
+    modify_h_test_inputs_and_g_small_project_b,
     rename_f_small_project_a,
 )
 
 
 @pytest.mark.parametrize(
-    ("repo", "side_effect", "git_diff_args", "test_paths", "python_paths", "extra_deps", "expected"),
+    (
+        "repo",
+        "side_effect",
+        "git_diff_args",
+        "test_paths",
+        "python_paths",
+        "extra_deps",
+        "expected",
+    ),
     [
         (
             "small_project_a",
@@ -84,8 +92,8 @@ from conftest import (
             ["test"],
             ["."],
             [
-                ("test/test_h.py", "test/test_h_modulo_inputs.csv"), 
-                ("small_project_b/f/f_1.py", "small_project_b/f/f_1.txt")
+                ("test/test_h.py", "test/test_h_modulo_inputs.csv"),
+                ("small_project_b/f/f_1.py", "small_project_b/f/f_1.txt"),
             ],
             {"test/test_g.py", "test/test_h.py"},
         ),
@@ -96,8 +104,8 @@ from conftest import (
             ["test"],
             ["."],
             [
-                ("test/test_h.py", "test/test_h_modulo_inputs.csv"), 
-                ("small_project_b/f/f_1.py", "small_project_b/f/f_1.txt")
+                ("test/test_h.py", "test/test_h_modulo_inputs.csv"),
+                ("small_project_b/f/f_1.py", "small_project_b/f/f_1.txt"),
             ],
             {"test/test_f.py", "test/test_g.py", "test/test_h.py"},
         ),
@@ -242,7 +250,14 @@ from conftest import (
     ],
 )
 def test_select_test_files(
-    repo, side_effect, git_diff_args, test_paths, python_paths, extra_deps, expected, request
+    repo,
+    side_effect,
+    git_diff_args,
+    test_paths,
+    python_paths,
+    extra_deps,
+    expected,
+    request,
 ):
     repo_path = request.getfixturevalue(repo)
     side_effect(repo_path)
@@ -258,7 +273,7 @@ def test_select_test_files(
                 test_paths,
                 python_paths,
                 dir_name=repo_path,
-                extra_deps=extra_deps
+                extra_deps=extra_deps,
             )
     else:
         test_files = select_test_files(
@@ -266,7 +281,7 @@ def test_select_test_files(
             test_paths,
             python_paths,
             dir_name=repo_path,
-            extra_deps=extra_deps
+            extra_deps=extra_deps,
         )
 
         # Expected must be in absolute paths
