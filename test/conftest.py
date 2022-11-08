@@ -41,13 +41,18 @@ def small_project_a(empty_git_repo):
     Create a project with the following dependencies:
 
     f/f.py -> g/g.py
+    test/test_f.py -> f/f.py
+    test/test_g.py -> g/g.py
 
-    ┌──────┐
-    │f/f.py│
-    └┬─────┘
-    ┌▽─────┐
-    │g/g.py│
-    └──────┘
+    ┌──────────────┐┌──────────────┐
+    │test/test_f.py││test/test_g.py│
+    └┬─────────────┘└┬─────────────┘
+    ┌▽─────┐         │
+    │f/f.py│         │
+    └┬─────┘         │
+    ┌▽───────────────▽┐
+    │g/g.py           │
+    └─────────────────┘
 
     Diagram generated at: https://arthursonzogni.com/Diagon/#GraphDAG
     """
@@ -55,8 +60,48 @@ def small_project_a(empty_git_repo):
 
 
 @pytest.fixture
+def small_project_b(empty_git_repo):
+    """
+    Create a project with the following dependencies:
+
+    f/f_1.py -> f/f_1.txt
+    g.py -> f/f_1.py
+    h.py -> f/f_2.py
+    h.py -> g.py
+    test_f.py -> f/f_1.py
+    test_f.py -> f/f_2.py
+    test_g.py -> g.py
+    test_h.py -> h.py
+    test_h.py -> test_h_modulo_inputs.csv
+
+    ┌─────────┐┌─────────┐┌──────────────┐
+    │test_f.py││test_g.py││test_h.py     │
+    └┬┬───────┘└┬────────┘└┬────────────┬┘
+     ││         │┌─────────▽──────────┐┌▽───────────────────────┐
+     ││         ││h.py                ││test_h_modulo_inputs.csv│
+     ││         │└┬┬──────────────────┘└────────────────────────┘
+     ││     ┌───│─┘│
+     │└─────│─┐ │  │
+    ┌▽──────▽┐│┌▽──▽┐
+    │f/f_2.py│││g.py│
+    └────────┘│└┬───┘
+    ┌─────────▽─▽┐
+    │f/f_1.py    │
+    └┬───────────┘
+    ┌▽────────┐
+    │f/f_1.txt│
+    └─────────┘
+
+    Diagram generated at: https://arthursonzogni.com/Diagon/#GraphDAG
+    """
+    return initialize_resource_repo(empty_git_repo, "small_project_b")
+
+
+@pytest.fixture
 def medium_project_a(empty_git_repo):
     """
+    # noqa: E501
+
     Creates a project with the following dependencies:
 
     src/a/a_3.py -> src/a/a_1.py
@@ -68,6 +113,55 @@ def medium_project_a(empty_git_repo):
     src/d/d_1.py -> src/c/c_1.py
     src/d/d_1.py -> src/b/b_2.py
     src/d/d_1.py -> src/c/c_2.py
+    test/test_a/test_a_1.py -> src/a/a_1.py
+    test/test_a/test_a_2.py -> src/a/a_2.py
+    test/test_a/test_a_3.py -> src/a/a_3.py
+    test/test_b/test_b_1.py -> src/a/b_1.py
+    test/test_b/test_b_2.py -> src/a/b_2.py
+    test/test_b/test_b.py -> src/a/b_1.py
+    test/test_b/test_b.py -> src/a/b_2.py
+    test/test_c/test_c_1.py -> src/c/c_1.py
+    test/test_c/test_c_2.py -> src/c/c_2.py
+    test/test_d/test_d_1.py -> src/d/d_1.py
+
+    ┌───────────────────────┐┌───────────────────────┐┌───────────────────────┐┌───────────────────────┐┌───────────────────────┐┌─────────────────────┐┌───────────────────────┐┌───────────────────────┐┌───────────────────────┐
+    │test/test_a/test_a_1.py││test/test_a/test_a_2.py││test/test_a/test_a_3.py││test/test_b/test_b_1.py││test/test_b/test_b_2.py││test/test_b/test_b.py││test/test_c/test_c_1.py││test/test_c/test_c_2.py││test/test_d/test_d_1.py│
+    └┬──────────────────────┘└┬──────────────────────┘└┬──────────────────────┘└┬──────────────────────┘└┬──────────────────────┘└┬┬───────────────────┘└┬──────────────────────┘└┬──────────────────────┘└┬──────────────────────┘
+     │                        │                  ┌─────│────────────────────────│────────────────────────│────────────────────────││─────────────────────│────────────────────────│────────────────────────┘
+     │                        │     ┌────────────│─────│────────────────────────│────────────────────────│────────────────────────││─────────────────────│────────────────────────┘
+     │                        │    ┌│────────────│─────│────────────────────────│────────────────────────│────────────────────────││─────────────────────┘
+     │            ┌───────────│────││────────────│─────│────────────────────────│────────────────────────│────────────────────────┘│
+    ┌┘┌───────────│───────────┘ ┌──││────────────│─────│────────────────────────│────────────────────────│─────────────────────────┘
+    │┌│───────────│─────────────│──││────────────│─────┘                        │                        │
+    │││           │┌────────────│──││────────────│──────────────────────────────┘                        │
+    │││           ││            │┌─││────────────│───────────────────────────────────────────────────────┘
+    │││┌──────────▽▽┐┌──────────▽▽┐││┌───────────▽┐
+    ││││src/a/b_1.py││src/a/b_2.py││││src/d/d_1.py│
+    │││└────────────┘└────────────┘││└┬┬───────┬──┘
+    │││                         ┌──││─│┘       │
+    │││           ┌─────────────│──││─┘        │
+    │││           │┌────────────│──┘│          │
+    │││           ││            │┌──┘          │
+    │││┌──────────▽▽┐┌──────────▽▽┐┌───────────▽┐
+    ││││src/c/c_1.py││src/c/c_2.py││src/b/b_2.py│
+    │││└─────────┬┬─┘└┬───────────┘└────────────┘
+    ││└──────────││┐┌─┘
+    │└┐          │└││┐
+    │┌▽──────────▽┐│││
+    ││src/a/a_3.py││││
+    │└─────────┬┬┬┘│││
+    │          │││ ││└────────────┐
+    │          │││ │└┐            │
+    │          │││ └┐│            │
+    │          └││──││───────────┐│
+    └┐          │└─┐││           ││
+     │          │  │││           ││
+     │          │  │││           ││
+    ┌▽──────────▽┐┌▽▽▽─────────┐┌▽▽──────────┐
+    │src/a/a_1.py││src/a/a_2.py││src/b/b_1.py│
+    └────────────┘└────────────┘└────────────┘
+
+    Same graph without test files:
 
     ┌───────────────────────────────────┐
     │src/d/d_1.py                       │
@@ -141,6 +235,31 @@ def add_h_small_project_a(project_root_dir):
         g.write("import small_project_a.h")
     repo.git.add(".")
     repo.git.commit("-m", "Import h.py from g.py")
+
+
+def modify_h_test_inputs_and_g_small_project_b(project_root_dir):
+    repo = git.Repo(project_root_dir)
+
+    with open(
+        os.path.join(project_root_dir, "test", "test_h_modulo_inputs.csv"), "w+"
+    ) as h:
+        h.write("23,10,3")
+
+    with open(os.path.join(project_root_dir, "small_project_b", "g.py"), "a+") as g:
+        g.write("# modify_h_test_inputs_and_g_small_project_b\n")
+
+    repo.git.add(".")
+    repo.git.commit("-m", "Modify test_h_modulo_inputs.csv and g.py")
+
+
+def modify_f_1_txt_small_project_b(project_root_dir):
+    repo = git.Repo(project_root_dir)
+
+    with open(os.path.join(project_root_dir, "small_project_b", "f", "f_1.txt"), "a+") as f_1:
+        f_1.write("# modify_f_txt_small_project_b\n")
+
+    repo.git.add(".")
+    repo.git.commit("-m", "Modify f.txt")
 
 
 def modify_b_1_medium_project_a(project_root_dir):
