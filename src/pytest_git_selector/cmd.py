@@ -1,6 +1,7 @@
 import argparse
-import pytest_git_selector.selector
-import pytest_git_selector.util
+
+from pytest_git_selector.selector import select_test_files
+from pytest_git_selector.util import parse_extra_deps_file
 
 
 def parse_args():
@@ -55,11 +56,11 @@ def main():
     args = parse_args()
 
     if args.extra_deps_file:
-        extra_deps = pytest_git_selector.util.parse_extra_deps_file(args.extra_deps_file)
+        extra_deps = parse_extra_deps_file(args.extra_deps_file)
     else:
         extra_deps = None
 
-    required_test_files = pytest_git_selector.selector.select_test_files(
+    required_test_files = select_test_files(
         vars(args)["git-diff-args"], args.test_path, args.src_path, dir_name=args.dir, extra_deps=extra_deps
     )
 

@@ -1,12 +1,12 @@
 import git
+import importlab.environment
+import importlab.graph
+import importlab.utils
 import os
 import networkx
 import pathlib
 import sys
 
-from importlab import environment
-from importlab import graph
-from importlab import utils
 from pytest_git_selector.util import to_absolute_path
 from typing import List, MutableSet, Optional, Tuple
 
@@ -66,7 +66,7 @@ def _to_absolute_path_extra_deps(extra_deps: List[Tuple[str, str]], base_dir_nam
 
 def _create_import_graph(
     git_diff_args: List[str], python_path, test_paths: List[str], dir_name: str = "."
-) -> graph.ImportGraph:
+) -> importlab.graph.ImportGraph:
     repo = git.Repo(dir_name)
 
     deleted_files_output = repo.git.diff(
@@ -77,17 +77,17 @@ def _create_import_graph(
     )
     deleted_files = [to_absolute_path(dir_name, d) for d in deleted_files_relative_path]
 
-    env = environment.Environment(
-        environment.path_from_pythonpath(":".join(python_path)), sys.version_info[:2]
+    env = importlab.environment.Environment(
+        importlab.environment.path_from_pythonpath(":".join(python_path)), sys.version_info[:2]
     )
-    test_filenames = utils.expand_source_files(test_paths)
+    test_filenames = importlab.utils.expand_source_files(test_paths)
 
     # Restore the deleted files temporarily to resolve any import issues that may arise from deleting them
     try:
         for deleted_file in deleted_files:
             open(deleted_file, "w+").close()
 
-        import_graph = graph.ImportGraph.create(env, test_filenames, True)
+        import_graph = importlab.graph.ImportGraph.create(env, test_filenames, True)
     finally:
         for deleted_file in deleted_files:
             os.remove(deleted_file)
