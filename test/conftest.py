@@ -37,11 +37,52 @@ def initialize_resource_repo(dest, resource_repo):
 
 @pytest.fixture
 def small_project_a(empty_git_repo):
+    """
+    Create a project with the following dependencies:
+
+    f/f.py -> g/g.py
+
+    ┌──────┐
+    │f/f.py│
+    └┬─────┘
+    ┌▽─────┐
+    │g/g.py│
+    └──────┘
+
+    """
     return initialize_resource_repo(empty_git_repo, "small_project_a")
 
 
 @pytest.fixture
 def medium_project_a(empty_git_repo):
+    """
+    Creates a project with the following dependencies:
+
+    src/a/a_3.py -> src/a/a_1.py
+    src/a/a_3.py -> src/a/a_2.py
+    src/a/a_3.py -> src/b/b_1.py
+    src/c/c_1.py -> src/a/a_3.py
+    src/c/c_1.py -> src/b/b_1.py
+    src/c/c_2.py -> src/a/a_2.py
+    src/d/d_1.py -> src/c/c_1.py
+    src/d/d_1.py -> src/b/b_2.py
+    src/d/d_1.py -> src/c/c_2.py
+
+    ┌───────────────────────────────────┐           
+    │src/d/d_1.py                       │           
+    └┬─────────────┬───────────────────┬┘           
+    ┌▽───────────┐┌▽─────────────────┐┌▽───────────┐
+    │src/c/c_2.py││src/c/c_1.py      ││src/b/b_2.py│
+    └┬───────────┘└┬────────────────┬┘└────────────┘
+    │┌────────────▽───────────────┐│               
+    ││src/a/a_3.py                ││               
+    │└┬───────────┬─────────────┬─┘│               
+    ┌▽─▽─────────┐┌▽───────────┐┌▽──▽────────┐      
+    │src/a/a_2.py││src/a/a_1.py││src/b/b_1.py│      
+    └────────────┘└────────────┘└────────────┘      
+    
+    """
+
     return initialize_resource_repo(empty_git_repo, "medium_project_a")
 
 
