@@ -1,11 +1,13 @@
 import git
 import os
 import networkx
+import pathlib
 import sys
 
 from importlab import environment
 from importlab import graph
 from importlab import utils
+from pytest_git_selector.util import to_absolute_path
 from typing import List, MutableSet, Optional, Tuple
 
 
@@ -18,12 +20,13 @@ def select_test_files(
 ) -> MutableSet[str]:
     repo = git.Repo(dir_name)
 
-    # Use --no-renames treats renames as an deletion of the pre-rename file and addition of the post-rename file
-    # This is easier to deal with in terms of analyzing the dependencies
+    # Use --no-renames treats renames as a deletion of the pre-rename file and addition of the post-rename file
+    # This is easier to deal with when analyzing the dependencies
     diff_files_relative_path = repo.git.diff("--name-only", "--no-renames", *git_diff_args).split(
         "\n"
     )
-    diff_files = [os.path.join(dir_name, p) for p in diff_files_relative_path]
+    # Import graph is stated in absolute paths so need absolute paths for diffs also
+    diff_files = {to_absolute_path(dir_name, p) for p in diff_files_relative_path}
 
     import_graph = _create_import_graph(
         git_diff_args, python_path, test_paths=test_paths, dir_name=dir_name
@@ -36,7 +39,7 @@ def select_test_files(
     root_ancestor_nodes = set()
 
     for node in import_graph.graph.nodes:
-        filename = import_graph.format(node)
+        filename = pathlib.Path(import_graph.format(node))
 
         if filename in diff_files:
             _find_root_ancestors(import_graph.graph, node, root_ancestor_nodes)
@@ -50,10 +53,11 @@ def _to_absolute_path_extra_deps(extra_deps: List[Tuple[str, str]], base_dir_nam
     extra_deps_absolute_paths = []
 
     for u, v in extra_deps:
+        # Graph uses strings, not pathlib.Path so convert to strings before adding to graph
         extra_deps_absolute_paths.append(
             (
-                u if os.path.isabs(u) else os.path.join(base_dir_name, u), 
-                v if os.path.isabs(v) else os.path.join(base_dir_name, v)
+                u if os.path.isabs(u) else str(to_absolute_path(base_dir_name, u)), 
+                v if os.path.isabs(v) else str(to_absolute_path(base_dir_name, v))
             )
         )
 
@@ -71,7 +75,7 @@ def _create_import_graph(
     deleted_files_relative_path = (
         deleted_files_output.split("\n") if deleted_files_output else []
     )
-    deleted_files = [os.path.join(dir_name, d) for d in deleted_files_relative_path]
+    deleted_files = [to_absolute_path(dir_name, d) for d in deleted_files_relative_path]
 
     env = environment.Environment(
         environment.path_from_pythonpath(":".join(python_path)), sys.version_info[:2]
