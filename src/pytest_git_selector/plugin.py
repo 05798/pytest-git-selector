@@ -1,7 +1,8 @@
 import argparse
 import pytest
-import pytest_git_selector.selector
-import pytest_git_selector.util
+
+from pytest_git_selector.selector import select_test_files
+from pytest_git_selector.util import parse_extra_deps_file
 
 
 def pytest_addoption(parser):
@@ -38,13 +39,13 @@ def pytest_collection_modifyitems(session, config, items):
 
     if git_diff_args := config.getoption("--git-diff-args"):
         if extra_deps_filename := config.getoption("--extra-deps-file"):
-            extra_deps = pytest_git_selector.util.parse_extra_deps_file(
+            extra_deps = parse_extra_deps_file(
                 extra_deps_filename
             )
         else:
             extra_deps = None
 
-        selected_items = pytest_git_selector.selector.select_test_files(
+        selected_items = select_test_files(
             git_diff_args,
             all_test_files,
             config.getoption("--src-path"),
