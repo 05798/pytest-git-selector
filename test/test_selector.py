@@ -186,20 +186,23 @@ def test_select_test_files(
     repo_path = request.getfixturevalue(repo)
     side_effect(repo_path)
 
+    test_paths = [os.path.join(repo_path, p) for p in test_paths]
+    python_paths = [os.path.join(repo_path, p) for p in python_paths]
+
     # Note paths are specified relative to repo_path since repo_path is not known beforehand
     if isinstance(expected, type) and issubclass(expected, Exception):
         with pytest.raises(expected):
             select_test_files(
                 git_diff_args,
-                [os.path.join(repo_path, p) for p in test_paths],
-                [os.path.join(repo_path, p) for p in python_paths],
+                test_paths,
+                python_paths,
                 dir_name=repo_path,
             )
     else:
         test_files = select_test_files(
             git_diff_args,
-            [os.path.join(repo_path, p) for p in test_paths],
-            [os.path.join(repo_path, p) for p in python_paths],
+            test_paths,
+            python_paths,
             dir_name=repo_path,
         )
 
