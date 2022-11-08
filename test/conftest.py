@@ -255,7 +255,9 @@ def modify_h_test_inputs_and_g_small_project_b(project_root_dir):
 def modify_f_1_txt_small_project_b(project_root_dir):
     repo = git.Repo(project_root_dir)
 
-    with open(os.path.join(project_root_dir, "small_project_b", "f", "f_1.txt"), "a+") as f_1:
+    with open(
+        os.path.join(project_root_dir, "small_project_b", "f", "f_1.txt"), "a+"
+    ) as f_1:
         f_1.write("# modify_f_txt_small_project_b\n")
 
     repo.git.add(".")

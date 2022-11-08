@@ -22,9 +22,9 @@ def select_test_files(
 
     # Use --no-renames treats renames as a deletion of the pre-rename file and addition of the post-rename file
     # This is easier to deal with when analyzing the dependencies
-    diff_files_relative_path = repo.git.diff("--name-only", "--no-renames", *git_diff_args).split(
-        "\n"
-    )
+    diff_files_relative_path = repo.git.diff(
+        "--name-only", "--no-renames", *git_diff_args
+    ).split("\n")
     # Import graph is stated in absolute paths so need absolute paths for diffs also
     diff_files = {to_absolute_path(dir_name, p) for p in diff_files_relative_path}
 
@@ -56,8 +56,8 @@ def _to_absolute_path_extra_deps(extra_deps: List[Tuple[str, str]], base_dir_nam
         # Graph uses strings, not pathlib.Path so convert to strings before adding to graph
         extra_deps_absolute_paths.append(
             (
-                u if os.path.isabs(u) else str(to_absolute_path(base_dir_name, u)), 
-                v if os.path.isabs(v) else str(to_absolute_path(base_dir_name, v))
+                u if os.path.isabs(u) else str(to_absolute_path(base_dir_name, u)),
+                v if os.path.isabs(v) else str(to_absolute_path(base_dir_name, v)),
             )
         )
 
@@ -78,7 +78,8 @@ def _create_import_graph(
     deleted_files = [to_absolute_path(dir_name, d) for d in deleted_files_relative_path]
 
     env = importlab.environment.Environment(
-        importlab.environment.path_from_pythonpath(":".join(python_path)), sys.version_info[:2]
+        importlab.environment.path_from_pythonpath(":".join(python_path)),
+        sys.version_info[:2],
     )
     test_filenames = importlab.utils.expand_source_files(test_paths)
 

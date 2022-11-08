@@ -14,7 +14,16 @@ from conftest import (
 
 # To run these tests, you will need to install the package in editable mode so that subprocess can use the entry point
 @pytest.mark.parametrize(
-    ("repo", "side_effect", "dir_", "test_path", "src_path", "extra_deps_file", "git_diff_args", "expected"),
+    (
+        "repo",
+        "side_effect",
+        "dir_",
+        "test_path",
+        "src_path",
+        "extra_deps_file",
+        "git_diff_args",
+        "expected",
+    ),
     [
         (
             "small_project_a",
@@ -39,7 +48,7 @@ from conftest import (
         (
             "small_project_b",
             modify_f_1_txt_small_project_b,
-            ".", 
+            ".",
             ["test"],
             ["."],
             "extra_deps.txt",
@@ -78,7 +87,16 @@ from conftest import (
     ],
 )
 def test_command_line(
-    repo, side_effect, dir_, test_path, src_path, extra_deps_file, git_diff_args, expected, request, monkeypatch
+    repo,
+    side_effect,
+    dir_,
+    test_path,
+    src_path,
+    extra_deps_file,
+    git_diff_args,
+    expected,
+    request,
+    monkeypatch,
 ):
     repo_path = request.getfixturevalue(repo)
     side_effect(repo_path)
@@ -87,26 +105,28 @@ def test_command_line(
     dir_ = os.path.join(repo_path, dir_)
     test_path = [os.path.join(repo_path, p) for p in test_path]
     src_path = [os.path.join(repo_path, p) for p in src_path]
-    
+
     if extra_deps_file:
         extra_deps_file = os.path.join(repo_path, extra_deps_file)
 
     dir_args = ["--dir", dir_]
     test_path_args = list(sum(zip(["--test-path"] * len(test_path), test_path), ()))
     src_path_args = list(sum(zip(["--src-path"] * len(src_path), src_path), ()))
-    extra_deps_file_arg = ["--extra-deps-file", extra_deps_file] if extra_deps_file else []
+    extra_deps_file_arg = (
+        ["--extra-deps-file", extra_deps_file] if extra_deps_file else []
+    )
 
     cmd = (
-        ["git-select-tests"] +
-        dir_args + 
-        test_path_args +
-        src_path_args + 
-        extra_deps_file_arg + 
-        git_diff_args
+        ["git-select-tests"]
+        + dir_args
+        + test_path_args
+        + src_path_args
+        + extra_deps_file_arg
+        + git_diff_args
     )
 
     with monkeypatch.context() as m:
-        m.setattr(sys, 'argv', cmd)
+        m.setattr(sys, "argv", cmd)
         f = io.StringIO()
 
         with contextlib.redirect_stdout(f):
