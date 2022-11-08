@@ -4,6 +4,8 @@ import pytest
 import shutil
 import tempfile
 
+pytest_plugins = ["pytester"]
+
 
 @pytest.fixture
 def empty_repo():
