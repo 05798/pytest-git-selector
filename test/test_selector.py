@@ -31,6 +31,14 @@ from conftest import (
         ),
         (
             "small_project_a",
+            modify_f_small_project_a,
+            ["HEAD~1...", "--diff-filter=m"],
+            ["test"],
+            ["."],
+            {},
+        ),
+        (
+            "small_project_a",
             modify_g_small_project_a,
             ["HEAD~1..."],
             ["test"],
@@ -150,6 +158,17 @@ from conftest import (
                 "test/test_b/test_b_1.py",
                 "test/test_b/test_b.py",
                 "test/test_c/test_c_1.py",
+                "test/test_c/test_c_2.py",
+                "test/test_d/test_d_1.py",
+            },
+        ),
+        (
+            "medium_project_a",
+            complex_workflow_b_medium_project_a_feature_1,
+            ["base...", "--diff-filter=M"],
+            ["test"],
+            ["src"],
+            {
                 "test/test_c/test_c_2.py",
                 "test/test_d/test_d_1.py",
             },
