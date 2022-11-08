@@ -1,5 +1,6 @@
 import argparse
 import pytest_git_selector.selector
+import pytest_git_selector.util
 
 
 def parse_args():
@@ -28,6 +29,16 @@ def parse_args():
         action="append",
     )
     parser.add_argument(
+        "--extra-deps-file",
+        help=(
+            "path of a file specifying extra module dependencies. "
+            "Edges should be in the form '(a.py,b.py)' where a.py imports b.py. Edges separated by a space or newline. "
+            "NOTE there is NO space after the comma. If edges are specified using relative paths, they interpreted as "
+            "being relative to the directory containing the project root directory containing the .git folder."
+        ),
+        default=None,
+    )
+    parser.add_argument(
         "git-diff-args",
         nargs=argparse.REMAINDER,
         help=(
@@ -43,8 +54,13 @@ def parse_args():
 def main():
     args = parse_args()
 
+    if args.extra_deps_file:
+        extra_deps = pytest_git_selector.util.parse_extra_deps_file(args.extra_deps_file)
+    else:
+        extra_deps = None
+
     required_test_files = pytest_git_selector.selector.select_test_files(
-        vars(args)["git-diff-args"], args.test_path, args.src_path, dir_name=args.dir
+        vars(args)["git-diff-args"], args.test_path, args.src_path, dir_name=args.dir, extra_deps=extra_deps
     )
 
     print("\n".join(required_test_files))
