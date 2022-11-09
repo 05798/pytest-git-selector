@@ -16,6 +16,7 @@ from conftest import (
 @pytest.mark.parametrize(
     (
         "repo",
+        "start_dir",
         "side_effect",
         "dir_",
         "test_path",
@@ -23,10 +24,15 @@ from conftest import (
         "extra_deps_file",
         "git_diff_args",
         "expected",
+        "make_dir_abs", 
+        "make_test_path_abs",
+        "make_src_path_abs",
+        "make_extra_deps_file_abs",
     ),
     [
         (
             "small_project_a",
+            "..",
             modify_f_small_project_a,
             ".",
             ["test"],
@@ -34,9 +40,14 @@ from conftest import (
             None,
             ["HEAD~1..."],
             {"test/test_f.py", "test/test_g.py"},
+            True,
+            True,
+            False,
+            False
         ),
         (
             "small_project_a",
+            ".",
             modify_f_small_project_a,
             ".",
             ["test"],
@@ -44,9 +55,14 @@ from conftest import (
             None,
             ["HEAD~1...", "--diff-filter=m"],
             set(),
+            False,
+            False,
+            True,
+            False
         ),
         (
             "small_project_b",
+            "small_project_b/f",
             modify_f_1_txt_small_project_b,
             ".",
             ["test"],
@@ -54,9 +70,14 @@ from conftest import (
             "extra_deps.txt",
             ["HEAD~1..."],
             {"test/test_f.py", "test/test_g.py", "test/test_h.py"},
+            False,
+            True,
+            False,
+            False
         ),
         (
             "medium_project_a",
+            ".",
             complex_workflow_a_medium_project_a,
             ".",
             ["test"],
@@ -73,9 +94,14 @@ from conftest import (
                 "test/test_c/test_c_2.py",
                 "test/test_d/test_d_1.py",
             },
+            False,
+            False,
+            False,
+            False
         ),
         (
             "small_project_a",
+            "..",
             modify_f_small_project_a,
             ".",
             ["fake"],
@@ -83,11 +109,16 @@ from conftest import (
             None,
             ["HEAD~1..."],
             set(),
+            False,
+            False,
+            False,
+            False
         ),
     ],
 )
 def test_command_line(
     repo,
+    start_dir,
     side_effect,
     dir_,
     test_path,
@@ -95,19 +126,40 @@ def test_command_line(
     extra_deps_file,
     git_diff_args,
     expected,
+    make_dir_abs, 
+    make_test_path_abs,
+    make_src_path_abs,
+    make_extra_deps_file_abs,
     request,
     monkeypatch,
 ):
     repo_path = request.getfixturevalue(repo)
+    start_dir_abs = os.path.join(repo_path, start_dir)
     side_effect(repo_path)
+
+    os.chdir(start_dir_abs)
 
     # Note paths are specified relative to repo_path since repo_path is not known beforehand
     dir_ = os.path.join(repo_path, dir_)
+
+    if not make_dir_abs:
+        dir_ = os.path.relpath(dir_, start_dir_abs)
+
     test_path = [os.path.join(repo_path, p) for p in test_path]
+
+    if not make_test_path_abs:
+        test_path = [os.path.relpath(p, start_dir_abs) for p in test_path]
+
     src_path = [os.path.join(repo_path, p) for p in src_path]
+
+    if not make_src_path_abs:
+        src_path = [os.path.relpath(p, start_dir_abs) for p in src_path]
 
     if extra_deps_file:
         extra_deps_file = os.path.join(repo_path, extra_deps_file)
+
+        if not make_extra_deps_file_abs:
+            extra_deps_file = os.path.relpath(extra_deps_file, start_dir_abs)
 
     dir_args = ["--dir", dir_]
     test_path_args = list(sum(zip(["--test-path"] * len(test_path), test_path), ()))
