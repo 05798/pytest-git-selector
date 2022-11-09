@@ -32,10 +32,12 @@ def parse_args():
     parser.add_argument(
         "--extra-deps-file",
         help=(
-            "path of a file specifying extra module dependencies. "
-            "Edges should be in the form '(a.py,b.py)' where a.py imports b.py. Edges separated by a space or newline. "
-            "NOTE there is NO space after the comma. If edges are specified using relative paths, they interpreted as "
-            "being relative to the directory containing the project root directory containing the .git folder."
+            "path of a file specifying extra module dependencies not captured by Python import statements. "
+            "Edges should be in the form '(a.py,b.json)' where a.py depends on b.json. "
+            "Edges separated by a space or newline. "
+            "NOTE there is NO space after the comma. "
+            "If edges are specified using relative paths, they interpreted as being relative to the directory "
+            "containing the project root directory containing the .git folder."
         ),
         default=None,
     )

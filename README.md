@@ -8,10 +8,12 @@
 
 The idea is fairly simple:
 
-1. Changes are analyzed using a `git diff` command. The arguments `git diff` are supplied by the user
+1. Changes are analyzed using a `git diff` command. The arguments to `git diff` are supplied by the user
 2. If a test module contains one of the changed files in its import tree, then select that test module
 
 The import tree is created using [`importlab`](https://github.com/google/importlab) which statically analyzes import statements to determine dependencies.
+
+See the [git-diff documentation](https://git-scm.com/docs/git-diff) for arguments that can be supplied to `git diff`.
 
 ## `pytest` plugin
 
@@ -21,6 +23,7 @@ This plugin adds two additional flags to `pytest`:
 
 1. `--git-diff-args` - arguments to pass to the `git diff` command used in the plugin to select tests that lead to a changed file
 2. `--src-path` - specifies the directory containing the source code for the project. `src` and the current working directory are automatically added so this argument should not be required in most cases
+3. `--extra-deps-file` - specifies a path to a file containing dependencies between files not captured by Python import statements e.g. test input files. Edges should be in the form '(a.py,b.json)' where a.py depends on b.json. Edges separated by a space or newline. NOTE there is NO space after the comma. If edges are specified using relative paths, they interpreted as being relative to the directory containing the project root directory containing the .git folder.
 
 ### Examples
 
@@ -35,14 +38,14 @@ pytest --git-diff-args main...
 ```
 pytest --git-diff-args HEAD~1...
 ```
+
+#### Selecting tests affected by changes between two commits with an extra dependency file `extra_deps.txt` specified and source code in `custom_src_dir/`
+```
+pytest --src-path custom_src_dir/ --extra-deps-file extra_deps.txt --git-diff-args 1b23b4b1...12da93k8
+```
 ## Command line tool
 
-The `git-select-tests` command line tool can be used to print out selected test modules. `--src-path` for the git repository
-under analysis must be provided to ensure `importlab` can resolve the import statements to a source file. `--test-path` must be provided currently for the purposes of test discovery. Arguments not specified via a flag are passed to `git diff`. 
-
-See `git-select-tests --help` for usage.
-
-See the [git-diff documentation](https://git-scm.com/docs/git-diff) for arguments that can be supplied to `git diff`.
+The `git-select-tests` command line tool can be used to print out selected test modules. This is mainly useful for projects that do not use `pytest` as a test runner e.g. `nosetest`. See `git-select-tests --help` for usage.
 
 ### Examples
 
