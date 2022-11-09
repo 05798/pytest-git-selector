@@ -369,10 +369,8 @@ def test_select_test_files(
     # So the tests specify all paths relative to this repo base directory and we convert to an absolute path always
     # Need to test whether the command can be run from different starting directories and difference combinations of
     # relative and absolute paths for test_paths, python_paths and dir_name args
-    # To use relative paths, we use the path relative to start dir
+    # If we want to test relative paths, we then convert it back relative to the STARTING directory not the repo
 
-    # For each path argument, first convert to an absolute path
-    # If the test asks for a relative path, then we convert the path relative to start_dir_abs
     test_paths = [os.path.join(repo_path, p) for p in test_paths]
 
     if not make_test_paths_abs:
