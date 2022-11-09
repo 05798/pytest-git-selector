@@ -23,7 +23,7 @@ from conftest import (
 @pytest.mark.parametrize(
     (
         "repo",
-        "start_dir", 
+        "start_dir",
         "side_effect",
         "git_diff_args",
         "test_paths",
@@ -31,14 +31,14 @@ from conftest import (
         "dir_name",
         "extra_deps",
         "expected",
-        "make_test_paths_abs", 
+        "make_test_paths_abs",
         "make_python_paths_abs",
         "make_dir_name_abs",
     ),
     [
         (
             "small_project_a",
-            ".", 
+            ".",
             modify_f_small_project_a,
             ["HEAD~1..."],
             ["test"],
@@ -52,7 +52,7 @@ from conftest import (
         ),
         (
             "small_project_a",
-            "..", 
+            "..",
             modify_f_small_project_a,
             ["HEAD~1...", "--diff-filter=m"],
             ["test"],
@@ -66,7 +66,7 @@ from conftest import (
         ),
         (
             "small_project_a",
-            ".", 
+            ".",
             modify_g_small_project_a,
             ["HEAD~1..."],
             ["test"],
@@ -80,7 +80,7 @@ from conftest import (
         ),
         (
             "small_project_a",
-            ".", 
+            ".",
             delete_f_small_project_a,
             ["HEAD~1..."],
             ["test"],
@@ -94,7 +94,7 @@ from conftest import (
         ),
         (
             "small_project_a",
-            "..", 
+            "..",
             rename_f_small_project_a,
             ["HEAD~1..."],
             ["test"],
@@ -108,7 +108,7 @@ from conftest import (
         ),
         (
             "small_project_a",
-            ".", 
+            ".",
             add_h_small_project_a,
             ["base..."],
             ["test"],
@@ -122,7 +122,7 @@ from conftest import (
         ),
         (
             "small_project_b",
-            ".", 
+            ".",
             modify_h_test_inputs_and_g_small_project_b,
             ["HEAD~1..."],
             ["test"],
@@ -139,7 +139,7 @@ from conftest import (
         ),
         (
             "small_project_b",
-            ".", 
+            ".",
             modify_f_1_txt_small_project_b,
             ["HEAD~1..."],
             ["test"],
@@ -156,7 +156,7 @@ from conftest import (
         ),
         (
             "medium_project_a",
-            ".", 
+            ".",
             modify_b_1_medium_project_a,
             ["HEAD~1..."],
             ["test"],
@@ -176,7 +176,7 @@ from conftest import (
         ),
         (
             "medium_project_a",
-            ".", 
+            ".",
             b_2_depends_on_a_2_medium_project_a,
             ["HEAD~2..."],
             ["test"],
@@ -198,7 +198,7 @@ from conftest import (
         ),
         (
             "medium_project_a",
-            ".", 
+            ".",
             complex_workflow_a_medium_project_a,
             ["base..."],
             ["test"],
@@ -221,7 +221,7 @@ from conftest import (
         ),
         (
             "medium_project_a",
-            ".", 
+            ".",
             complex_workflow_a_medium_project_a_feature_1,
             ["base..."],
             ["test"],
@@ -242,7 +242,7 @@ from conftest import (
         ),
         (
             "medium_project_a",
-            ".", 
+            ".",
             complex_workflow_b_medium_project_a,
             ["base..."],
             ["test"],
@@ -263,7 +263,7 @@ from conftest import (
         ),
         (
             "medium_project_a",
-            "src/a", 
+            "src/a",
             complex_workflow_b_medium_project_a_feature_1,
             ["base..."],
             ["test"],
@@ -285,7 +285,7 @@ from conftest import (
         ),
         (
             "medium_project_a",
-            "test/", 
+            "test/",
             complex_workflow_b_medium_project_a_feature_1,
             ["base...", "--diff-filter=M"],
             ["test"],
@@ -302,7 +302,7 @@ from conftest import (
         ),
         (
             "small_project_a",
-            ".", 
+            ".",
             modify_f_small_project_a,
             [],
             [],
@@ -316,7 +316,7 @@ from conftest import (
         ),
         (
             "small_project_a",
-            "..", 
+            "..",
             modify_f_small_project_a,
             ["HEAD~1..."],
             [],
@@ -330,7 +330,7 @@ from conftest import (
         ),
         (
             "empty_repo",
-            ".", 
+            ".",
             lambda x: None,
             ["HEAD~1..."],
             [],
@@ -351,7 +351,7 @@ def test_select_test_files(
     git_diff_args,
     test_paths,  # relative to repo base dir
     python_paths,  # relative to repo base dir
-    dir_name,   # relative to repo base dir
+    dir_name,  # relative to repo base dir
     extra_deps,
     expected,
     make_test_paths_abs,  # convert test paths to absolute paths before passing to function
@@ -367,7 +367,7 @@ def test_select_test_files(
 
     # Path handling is a little complicated since we don't know the path of the repo beforehand
     # So the tests specify all paths relative to this repo base directory and we convert to an absolute path always
-    # Need to test whether the command can be run from different starting directories and difference combinations of 
+    # Need to test whether the command can be run from different starting directories and difference combinations of
     # relative and absolute paths for test_paths, python_paths and dir_name args
     # To use relative paths, we use the path relative to start dir
 
@@ -377,7 +377,7 @@ def test_select_test_files(
 
     if not make_test_paths_abs:
         test_paths = [os.path.relpath(p, start_dir_abs) for p in test_paths]
-    
+
     python_paths = [os.path.join(repo_path, p) for p in python_paths]
 
     if not make_python_paths_abs:
