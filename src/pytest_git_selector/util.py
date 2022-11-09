@@ -16,4 +16,4 @@ def parse_extra_deps_file(extra_deps_filename) -> List[Tuple[str, str]]:
 def to_absolute_path(base_dir_name: str, relative_path: str) -> pathlib.Path:
     if not os.path.isabs(base_dir_name):
         base_dir_name = os.path.join(os.getcwd(), base_dir_name)
-    return pathlib.Path(os.path.join(base_dir_name, relative_path))
+    return pathlib.Path(os.path.join(base_dir_name, relative_path)).resolve()
