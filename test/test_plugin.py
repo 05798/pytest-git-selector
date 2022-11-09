@@ -17,6 +17,8 @@ from conftest import (
         "extra_deps_file",
         "git_diff_args",
         "expected_outcomes",
+        "make_src_path_abs", 
+        "make_extra_deps_file_abs",
     ),
     [
         (
@@ -26,6 +28,8 @@ from conftest import (
             None,
             ["HEAD~1"],
             {"passed": 2},
+            False,
+            False,
         ),
         (
             "small_project_a",
@@ -34,6 +38,8 @@ from conftest import (
             None,
             ["HEAD~1"],
             {"passed": 1, "deselected": 1},
+            False,
+            True,
         ),
         (
             "small_project_a",
@@ -42,6 +48,8 @@ from conftest import (
             None,
             ["HEAD~1...", "--diff-filter=m"],
             {"passed": 0, "deselected": 2},
+            True,
+            False,
         ),
         (
             "small_project_b",
@@ -50,6 +58,8 @@ from conftest import (
             "extra_deps.txt",
             ["HEAD~1..."],
             {"passed": 3, "deselected": 3},
+            True,
+            True,
         ),
         (
             "medium_project_a",
@@ -61,6 +71,8 @@ from conftest import (
                 "deselected": 1,
                 "errors": 2,
             },  # errors since the workflow deletes a source file without changing imports
+            False,
+            False,
         ),
     ],
 )
@@ -71,6 +83,8 @@ def test_plugin(
     extra_deps_file,
     git_diff_args,
     expected_outcomes,
+    make_src_path_abs,
+    make_extra_deps_file_abs,
     pytester,
     request,
 ):
@@ -81,11 +95,16 @@ def test_plugin(
     pytester.syspathinsert(repo_path)
     pytester.syspathinsert(os.path.join(repo_path, "src/"))
 
-    src_path = [os.path.join(repo_path, p) for p in src_path]
+    if make_src_path_abs:
+        src_path = [os.path.join(repo_path, p) for p in src_path]
+
     src_path_args = list(sum(zip(["--src-path"] * len(src_path), src_path), ()))
 
     if extra_deps_file:
-        extra_deps_file = os.path.join(repo_path, extra_deps_file)
+
+        if make_extra_deps_file_abs:
+            extra_deps_file = os.path.join(repo_path, extra_deps_file)
+
         extra_deps_file_args = ["--extra-deps-file", extra_deps_file]
     else:
         extra_deps_file_args = []
