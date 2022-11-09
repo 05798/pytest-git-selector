@@ -17,7 +17,7 @@ from conftest import (
         "extra_deps_file",
         "git_diff_args",
         "expected_outcomes",
-        "make_src_path_abs", 
+        "make_src_path_abs",
         "make_extra_deps_file_abs",
     ),
     [

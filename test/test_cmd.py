@@ -24,7 +24,7 @@ from conftest import (
         "extra_deps_file",
         "git_diff_args",
         "expected",
-        "make_dir_abs", 
+        "make_dir_abs",
         "make_test_path_abs",
         "make_src_path_abs",
         "make_extra_deps_file_abs",
@@ -43,7 +43,7 @@ from conftest import (
             True,
             True,
             False,
-            False
+            False,
         ),
         (
             "small_project_a",
@@ -58,7 +58,7 @@ from conftest import (
             False,
             False,
             True,
-            False
+            False,
         ),
         (
             "small_project_b",
@@ -73,7 +73,7 @@ from conftest import (
             False,
             True,
             False,
-            False
+            False,
         ),
         (
             "medium_project_a",
@@ -97,7 +97,7 @@ from conftest import (
             False,
             False,
             False,
-            False
+            False,
         ),
         (
             "small_project_a",
@@ -112,7 +112,7 @@ from conftest import (
             False,
             False,
             False,
-            False
+            False,
         ),
     ],
 )
@@ -126,7 +126,7 @@ def test_command_line(
     extra_deps_file,
     git_diff_args,
     expected,
-    make_dir_abs, 
+    make_dir_abs,
     make_test_path_abs,
     make_src_path_abs,
     make_extra_deps_file_abs,
