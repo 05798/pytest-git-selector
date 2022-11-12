@@ -2,7 +2,7 @@
 
 ## Introduction
 
-`pytest-git-selector` is a simple project to automatically select tests that have been affected by code changes. This is mainly useful for reducing the number of tests in frequently run CI/CD jobs on feature branches (e.g. push, opening a pull request).
+`pytest-git-selector` is a simple project to automatically select tests that have been affected by code changes. This is mainly useful for reducing the number of tests in frequently run CI/CD jobs on feature branches (e.g. running tests based on differences between the merge base and the feature branch).
 
 ## Idea
 

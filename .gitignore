@@ -2,6 +2,7 @@
 .pytest_cache/
 .vscode/
 build/
+dist/
 target/
 venv/
 
