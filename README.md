@@ -64,7 +64,7 @@ git-select-tests --src-path src/ --test-path test/ HEAD~1...
 
 ## Comparison with `pytest-diff-selector`
 
-This idea has been implemented before in this [`pytest-diff-selector` project](https://github.com/fruch/pytest-diff-selector). The main differences are:
+This idea has been implemented before in this `pytest-diff-selector` [project](https://github.com/fruch/pytest-diff-selector). The main differences are:
 1. `pytest-git-selector` leverages the `importlab` library as opposed to using a proprietary static analyzer
 2. `pytest-git-selector` implements a `pytest` plugin
 
