@@ -1,5 +1,6 @@
 .coverage
 .pytest_cache/
+.tox/
 .vscode/
 build/
 dist/
