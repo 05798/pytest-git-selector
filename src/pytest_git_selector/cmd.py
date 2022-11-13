@@ -71,7 +71,7 @@ def main():
     )
 
     print("\n".join(required_test_files))
-
+    x = 1
     return 0
 
 
