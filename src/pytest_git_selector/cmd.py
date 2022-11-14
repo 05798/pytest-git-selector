@@ -1,33 +1,50 @@
 import argparse
+import sys
 
 from pytest_git_selector.selector import select_test_files
 from pytest_git_selector.util import parse_extra_deps_file
 
 
 def parse_args():
+    do_exit_and_print_usage = False
+
+    try:
+        delimiter_index = sys.argv.index("--")
+        git_diff_args = sys.argv[delimiter_index + 1 :]
+
+        if not git_diff_args:
+            raise ValueError
+
+        sys.argv[:] = sys.argv[:delimiter_index]
+    except ValueError:
+        git_diff_args = None
+        do_exit_and_print_usage = True  # Delay raising error so that help message is populated with args below
+
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--dir",
-        help="base directory of the project containing the .git folder",
+        help="base directory of the project containing the .git folder. Defaults to current directory",
         default=".",
     )
     parser.add_argument(
         "--test-path",
         help=(
             "path of a test file or directory containing test files. "
-            "These are relative to the current working directory not the directory specified in '--dir'"
+            "These are relative to the current working directory not the directory specified in '--dir'. "
+            "Defaults to: 'test', 'tests'"
         ),
-        required=True,
         action="append",
+        default=["test", "tests"],
     )
     parser.add_argument(
         "--src-path",
         help=(
             "path of directory containing source files for the project. "
-            "These are relative to the current working directory not the directory specified in '--dir'"
+            "These are relative to the current working directory not the directory specified in '--dir'. "
+            "Defaults to: '.', 'src'"
         ),
-        required=True,
         action="append",
+        default=[".", "src"],
     )
     parser.add_argument(
         "--extra-deps-file",
@@ -41,21 +58,32 @@ def parse_args():
         ),
         default=None,
     )
+    # Add a dummy option to document the -- delimiter
     parser.add_argument(
-        "git-diff-args",
-        nargs=argparse.REMAINDER,
+        "-- ",
+        metavar="[git-diff-args]",
         help=(
             "args to pass to git diff. "
+            "They must be appear at the end of the args separated from the rest of the args of git-select-tests using "
+            "the '--' delimiter e.g. pytest --collect-only -- --diff-filter=M HEAD~1..."
             "git diff is called internally with the --name-only and --no-renames automatically. "
             "Any additional arguments must not interfere with the output format e.g. do not use the --output flag "
             "which writes to a file instead of stdout"
         ),
     )
-    return parser.parse_args()
+
+    if do_exit_and_print_usage:
+        parser.print_help(sys.stderr)
+        raise ValueError  # reraise the ValueError after printing help
+
+    return parser.parse_args(), git_diff_args
 
 
 def main():
-    args = parse_args()
+    try:
+        args, git_diff_args = parse_args()
+    except ValueError:
+        return 1
 
     if args.extra_deps_file:
         extra_deps = parse_extra_deps_file(args.extra_deps_file)
@@ -63,7 +91,7 @@ def main():
         extra_deps = None
 
     required_test_files = select_test_files(
-        vars(args)["git-diff-args"],
+        git_diff_args,
         args.test_path,
         args.src_path,
         dir_name=args.dir,
@@ -76,4 +104,4 @@ def main():
 
 
 if __name__ == "__main__":
-    exit(main())
+    sys.exit(main())
