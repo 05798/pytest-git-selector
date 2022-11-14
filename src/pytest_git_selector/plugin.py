@@ -64,8 +64,8 @@ def pytest_addoption(parser):
 @pytest.hookimpl()
 def pytest_collection_modifyitems(session, config, items):
     all_test_files = list(set(str(item.path) for item in items))  # remove duplicates
-    
-    if git_diff_args:= config.stash.get(git_diff_args_key, None):
+
+    if git_diff_args := config.stash.get(git_diff_args_key, None):
         if extra_deps_filename := config.getoption("--extra-deps-file"):
             extra_deps = parse_extra_deps_file(extra_deps_filename)
         else:
