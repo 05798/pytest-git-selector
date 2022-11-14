@@ -27,21 +27,21 @@ This plugin adds two additional flags to `pytest`:
 
 ### Examples
 
-The following examples assume the project contains source code in `<project_root>/src/` and tests in `<project_root>/test/`. `pytest` is run in `<project_root>` in all the following examples.
+The following examples assume the project contains source code in `<project_root>/src/` and tests in `<project_root>/test/`. `pytest` is run in `<project_root>` in all the following examples. The arguments to the `git diff` command are separated by the `--` delimiter.
 
 #### Selecting tests affected by changes between a feature branch and its merge base
 ```
-pytest --git-diff-args main...
+pytest -- main...
 ```
 
 #### Selecting tests affected by changes in the last commit
 ```
-pytest --git-diff-args HEAD~1...
+pytest -- HEAD~1...
 ```
 
 #### Selecting tests affected by changes between two commits with an extra dependency file `extra_deps.txt` specified and source code in `custom_src_dir/`
 ```
-pytest --src-path custom_src_dir/ --extra-deps-file extra_deps.txt --git-diff-args 1b23b4b1...12da93k8
+pytest --src-path custom_src_dir/ --extra-deps-file extra_deps.txt -- 1b23b4b1...12da93k8
 ```
 ## Command line tool
 
@@ -49,17 +49,17 @@ The `git-select-tests` command line tool can be used to print out selected test 
 
 ### Examples
 
-The following examples assume the project contains source code in `<project_root>/src/` and tests in `<project_root>/test/`.
+The following examples assume the project contains source code in `<project_root>/src/` and tests in `<project_root>/test/`. The arguments to the `git diff` command are separated by the `--` delimiter.
 
 #### Selecting tests affected by changes between a feature branch and its merge base
 
 ```
-git-select-tests --src-path src/ --test-path test/ main...
+git-select-tests --src-path src/ --test-path test/ -- main...
 ```
 
 #### Selecting tests affected by changes in the last commit
 ```
-git-select-tests --src-path src/ --test-path test/ HEAD~1...
+git-select-tests --src-path src/ --test-path test/ -- HEAD~1...
 ```
 
 ## Comparison with `pytest-diff-selector`
