@@ -20,6 +20,16 @@ def parse_args():
         git_diff_args = None
         do_exit_and_print_usage = True  # Delay raising error so that help message is populated with args below
 
+    parser = _build_parser()
+
+    if do_exit_and_print_usage:
+        parser.print_help(sys.stderr)
+        raise ValueError  # reraise the ValueError after printing help
+
+    return parser.parse_args(), git_diff_args
+
+
+def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--dir",
@@ -71,12 +81,7 @@ def parse_args():
             "which writes to a file instead of stdout"
         ),
     )
-
-    if do_exit_and_print_usage:
-        parser.print_help(sys.stderr)
-        raise ValueError  # reraise the ValueError after printing help
-
-    return parser.parse_args(), git_diff_args
+    return parser
 
 
 def main():

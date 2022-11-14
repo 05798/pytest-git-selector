@@ -154,6 +154,61 @@ def test_command_line(
 
     os.chdir(start_dir_abs)
 
+    cmd = _build_command(
+        repo_path,
+        start_dir_abs,
+        dir_,
+        test_path,
+        src_path,
+        extra_deps_file,
+        git_diff_args,
+        make_dir_abs,
+        make_test_path_abs,
+        make_src_path_abs,
+        make_extra_deps_file_abs,
+    )
+
+    if isinstance(expected, int):
+        expected_exit_code = expected
+    else:
+        expected_exit_code = 0
+
+    with monkeypatch.context() as m:
+        m.setattr(sys, "argv", cmd)
+        f = io.StringIO()
+
+        with contextlib.redirect_stdout(f):
+            assert pytest_git_selector.cmd.main() == expected_exit_code
+
+        if expected_exit_code != 0:
+            return
+
+        f.seek(0)
+
+    # Expected must be in absolute paths
+    expected = set(os.path.join(repo_path, p) for p in expected)
+
+    if (output := "".join(f.readlines())).strip():
+        actual = set(output.strip().split("\n"))
+    else:
+        actual = set()
+
+    assert actual == expected
+
+
+def _build_command(
+    repo_path,
+    start_dir_abs,
+    dir_,
+    test_path,
+    src_path,
+    extra_deps_file,
+    git_diff_args,
+    make_dir_abs,
+    make_test_path_abs,
+    make_src_path_abs,
+    make_extra_deps_file_abs,
+):
     # Note paths are specified relative to repo_path since repo_path is not known beforehand
     dir_ = os.path.join(repo_path, dir_)
 
@@ -193,29 +248,4 @@ def test_command_line(
         + git_diff_args_w_delimiter
     )
 
-    if isinstance(expected, int):
-        expected_exit_code = expected
-    else:
-        expected_exit_code = 0
-
-    with monkeypatch.context() as m:
-        m.setattr(sys, "argv", cmd)
-        f = io.StringIO()
-
-        with contextlib.redirect_stdout(f):
-            assert pytest_git_selector.cmd.main() == expected_exit_code
-
-        if expected_exit_code != 0:
-            return
-
-        f.seek(0)
-
-    # Expected must be in absolute paths
-    expected = set(os.path.join(repo_path, p) for p in expected)
-
-    if (output := "".join(f.readlines())).strip():
-        actual = set(output.strip().split("\n"))
-    else:
-        actual = set()
-
-    assert actual == expected
+    return cmd
