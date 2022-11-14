@@ -74,6 +74,18 @@ from conftest import (
             False,
             False,
         ),
+        (
+            "small_project_a",
+            lambda x: None,
+            ["."],
+            None,
+            [],
+            {
+                "passed": 2,
+            },  # Should perform no deselection since no git diff args were passed
+            False,
+            False,
+        ),
     ],
 )
 def test_plugin(
@@ -109,11 +121,11 @@ def test_plugin(
     else:
         extra_deps_file_args = []
 
-    git_diff_args_w_flag = ["--git-diff-args"] + git_diff_args
+    git_diff_args_w_delimiter = ["--"] + git_diff_args
 
     result = pytester.runpytest(
         f"--basetemp={pytester.path.parent.joinpath('basetemp')}",
-        *(src_path_args + extra_deps_file_args + git_diff_args_w_flag),
+        *(src_path_args + extra_deps_file_args + git_diff_args_w_delimiter),
     )
 
     result.assert_outcomes(**expected_outcomes)
