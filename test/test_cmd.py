@@ -168,10 +168,7 @@ def test_command_line(
         make_extra_deps_file_abs,
     )
 
-    if isinstance(expected, int):
-        expected_exit_code = expected
-    else:
-        expected_exit_code = 0
+    expected_exit_code = expected if isinstance(expected, int) else 0
 
     with monkeypatch.context() as m:
         m.setattr(sys, "argv", cmd)
@@ -239,7 +236,7 @@ def _build_command(
     )
     git_diff_args_w_delimiter = ["--"] + git_diff_args
 
-    cmd = (
+    return (
         ["git-select-tests"]
         + dir_args
         + test_path_args
@@ -247,5 +244,3 @@ def _build_command(
         + extra_deps_file_arg
         + git_diff_args_w_delimiter
     )
-
-    return cmd
