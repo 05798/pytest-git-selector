@@ -114,6 +114,21 @@ from conftest import (
             False,
             False,
         ),
+        (
+            "small_project_a",
+            "..",
+            modify_f_small_project_a,
+            ".",
+            ["fake"],
+            ["fake"],
+            None,
+            [],
+            1,
+            False,
+            False,
+            False,
+            False,
+        ),
     ],
 )
 def test_command_line(
@@ -167,6 +182,7 @@ def test_command_line(
     extra_deps_file_arg = (
         ["--extra-deps-file", extra_deps_file] if extra_deps_file else []
     )
+    git_diff_args_w_delimiter = ["--"] + git_diff_args
 
     cmd = (
         ["git-select-tests"]
@@ -174,15 +190,23 @@ def test_command_line(
         + test_path_args
         + src_path_args
         + extra_deps_file_arg
-        + git_diff_args
+        + git_diff_args_w_delimiter
     )
+
+    if isinstance(expected, int):
+        expected_exit_code = expected
+    else:
+        expected_exit_code = 0
 
     with monkeypatch.context() as m:
         m.setattr(sys, "argv", cmd)
         f = io.StringIO()
 
         with contextlib.redirect_stdout(f):
-            assert pytest_git_selector.cmd.main() == 0
+            assert pytest_git_selector.cmd.main() == expected_exit_code
+
+        if expected_exit_code != 0:
+            return
 
         f.seek(0)
 
