@@ -107,6 +107,31 @@ def test_plugin(
     pytester.syspathinsert(repo_path)
     pytester.syspathinsert(os.path.join(repo_path, "src/"))
 
+    pytest_args = _build_pytest_args(
+        repo_path,
+        src_path,
+        extra_deps_file,
+        git_diff_args,
+        make_src_path_abs,
+        make_extra_deps_file_abs,
+    )
+
+    result = pytester.runpytest(
+        f"--basetemp={pytester.path.parent.joinpath('basetemp')}",
+        *pytest_args,
+    )
+
+    result.assert_outcomes(**expected_outcomes)
+
+
+def _build_pytest_args(
+    repo_path,
+    src_path,
+    extra_deps_file,
+    git_diff_args,
+    make_src_path_abs,
+    make_extra_deps_file_abs,
+):
     if make_src_path_abs:
         src_path = [os.path.join(repo_path, p) for p in src_path]
 
@@ -123,9 +148,4 @@ def test_plugin(
 
     git_diff_args_w_delimiter = ["--"] + git_diff_args
 
-    result = pytester.runpytest(
-        f"--basetemp={pytester.path.parent.joinpath('basetemp')}",
-        *(src_path_args + extra_deps_file_args + git_diff_args_w_delimiter),
-    )
-
-    result.assert_outcomes(**expected_outcomes)
+    return src_path_args + extra_deps_file_args + git_diff_args_w_delimiter
