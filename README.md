@@ -17,17 +17,20 @@ See the [git-diff documentation](https://git-scm.com/docs/git-diff) for argument
 
 ## `pytest` plugin
 
-The plugin will automatically deselect tests whose descendants in the dependency tree have not changed. The changed are determined via a `git diff` command. 
+The plugin will automatically deselect tests whose descendants in the dependency tree have not changed. The changed are determined via a `git diff` command that is called with user supplied argument. User supplied arguments to `git diff` must be appear at the end of the `pytest` arguments separated from the rest of the `pytest` arguments using the `--` delimiter e.g. 
+
+```
+pytest --collect-only -- --diff-filter=M HEAD~1...
+```
 
 This plugin adds two additional flags to `pytest`: 
 
-1. `--git-diff-args` - arguments to pass to the `git diff` command used in the plugin to select tests that lead to a changed file
-2. `--src-path` - specifies the directory containing the source code for the project. `src` and the current working directory are automatically added so this argument should not be required in most cases
-3. `--extra-deps-file` - specifies a path to a file containing dependencies between files not captured by Python import statements e.g. test input files. Edges should be in the form '(a.py,b.json)' where a.py depends on b.json. Edges separated by a space or newline. NOTE there is NO space after the comma. If edges are specified using relative paths, they interpreted as being relative to the directory containing the project root directory containing the .git folder.
+1. `--src-path` - specifies the directory containing the source code for the project. `src` and the current working directory are automatically added so this argument should not be required in most cases
+2. `--extra-deps-file` - specifies a path to a file containing dependencies between files not captured by Python import statements e.g. test input files. Edges should be in the form '(a.py,b.json)' where a.py depends on b.json. Edges separated by a space or newline. NOTE there is NO space after the comma. If edges are specified using relative paths, they interpreted as being relative to the directory containing the project root directory containing the .git folder.
 
 ### Examples
 
-The following examples assume the project contains source code in `<project_root>/src/` and tests in `<project_root>/test/`. `pytest` is run in `<project_root>` in all the following examples. The arguments to the `git diff` command are separated by the `--` delimiter.
+The following examples assume the project contains source code in `<project_root>/src/` and tests in `<project_root>/test/`. `pytest` is run in `<project_root>` in all the following examples.
 
 #### Selecting tests affected by changes between a feature branch and its merge base
 ```
@@ -45,11 +48,11 @@ pytest --src-path custom_src_dir/ --extra-deps-file extra_deps.txt -- 1b23b4b1..
 ```
 ## Command line tool
 
-The `git-select-tests` command line tool can be used to print out selected test modules. This is mainly useful for projects that do not use `pytest` as a test runner e.g. `nosetest`. See `git-select-tests --help` for usage.
+The `git-select-tests` command line tool can be used to print out selected test modules. This is mainly useful for projects that do not use `pytest` as a test runner e.g. `nosetest`. The arguments to the `git diff` command are separated by the `--` delimiter. See `git-select-tests --help` for usage.
 
 ### Examples
 
-The following examples assume the project contains source code in `<project_root>/src/` and tests in `<project_root>/test/`. The arguments to the `git diff` command are separated by the `--` delimiter.
+The following examples assume the project contains source code in `<project_root>/src/` and tests in `<project_root>/test/`.
 
 #### Selecting tests affected by changes between a feature branch and its merge base
 
