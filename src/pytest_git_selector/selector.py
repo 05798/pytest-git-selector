@@ -7,8 +7,10 @@ import networkx
 import pathlib
 import sys
 
-from pytest_git_selector.util import to_absolute_path
 from typing import List, MutableSet, Optional, Tuple
+
+from pytest_git_selector.errors import UnsupportedArgumentException
+from pytest_git_selector.util import to_absolute_path
 
 
 def select_test_files(
@@ -18,15 +20,11 @@ def select_test_files(
     dir_name: str = ".",
     extra_deps: Optional[List[Tuple[str, str]]] = None,
 ) -> MutableSet[str]:
-    repo = git.Repo(dir_name)
-
     # Use --no-renames treats renames as a deletion of the pre-rename file and addition of the post-rename file
     # This is easier to deal with when analyzing the dependencies
-    diff_files_relative_path = repo.git.diff(
-        "--name-only", "--no-renames", *git_diff_args
-    ).split("\n")
-    # Import graph is stated in absolute paths so need absolute paths for diffs also
-    diff_files = {to_absolute_path(dir_name, p) for p in diff_files_relative_path}
+    diff_files = _call_git_diff(
+        git_diff_args, ["--name-only", "--no-renames"], dir_name=dir_name
+    )
 
     import_graph = _create_import_graph(
         git_diff_args, python_path, test_paths=test_paths, dir_name=dir_name
@@ -49,6 +47,69 @@ def select_test_files(
     return root_ancestor_nodes
 
 
+def _call_git_diff(
+    user_git_diff_args: List[str], extra_git_diff_args: List[str], dir_name: str = "."
+) -> MutableSet[pathlib.Path]:
+    repo = git.Repo(dir_name)
+
+    sanitized_args = _sanitize_user_git_diff_args(
+        user_git_diff_args, extra_git_diff_args
+    )
+
+    git_diff_output = repo.git.diff(*sanitized_args)
+
+    if not git_diff_output:
+        return set()
+
+    diff_files_relative_path = git_diff_output.split("\n")
+
+    # Import graph is stated in absolute paths so need absolute paths for diffs also
+    return {to_absolute_path(dir_name, p) for p in diff_files_relative_path}
+
+
+def _sanitize_user_git_diff_args(
+    user_git_diff_args: List[str], extra_git_diff_args: List[str]
+) -> List[str]:
+    # The --name-only flag seems to supersede any other flags that format the output so no need to validate thoroughly
+
+    # Just need to check:
+    # a) only one diff-filter arg is passed in (using the value given in extra_git_diff_args if duplicates are found)
+    #       since this can interfere with diff-filter args supplied by us
+    # b) the --output flag isn't supplied
+    sanitized_args = []
+    extra_args_contains_diff_filter = any(
+        x.startswith("--diff-filter") for x in extra_git_diff_args
+    )
+    i = 0
+
+    while i < len(user_git_diff_args):
+        v = user_git_diff_args[i]
+
+        if v == "--output":
+            raise UnsupportedArgumentException(
+                "--output argument to git diff is not supported"
+            )
+
+        if v.startswith("--diff-filter"):
+            if v.startswith("--diff-filter="):
+                _, filter_values = v.split("=", 1)
+            else:
+                filter_values = user_git_diff_args[i + 1]
+                i += 1  # Eat up an extra argument since the filter param is separated from flag by a space
+
+            if "R" in filter_values:
+                raise UnsupportedArgumentException("R diff filter is not supported")
+
+            if extra_args_contains_diff_filter:
+                i += 1
+                continue
+
+        sanitized_args.append(v)
+        i += 1
+
+    return sanitized_args + extra_git_diff_args
+
+
 def _to_absolute_path_extra_deps(extra_deps: List[Tuple[str, str]], base_dir_name: str):
     extra_deps_absolute_paths = []
 
@@ -67,15 +128,11 @@ def _to_absolute_path_extra_deps(extra_deps: List[Tuple[str, str]], base_dir_nam
 def _create_import_graph(
     git_diff_args: List[str], python_path, test_paths: List[str], dir_name: str = "."
 ) -> importlab.graph.ImportGraph:
-    repo = git.Repo(dir_name)
-
-    deleted_files_output = repo.git.diff(
-        "--name-only", "--diff-filter=D", "--no-renames", *git_diff_args
+    deleted_files = _call_git_diff(
+        git_diff_args,
+        ["--name-only", "--diff-filter=D", "--no-renames"],
+        dir_name=dir_name,
     )
-    deleted_files_relative_path = (
-        deleted_files_output.split("\n") if deleted_files_output else []
-    )
-    deleted_files = [to_absolute_path(dir_name, d) for d in deleted_files_relative_path]
 
     env = importlab.environment.Environment(
         importlab.environment.path_from_pythonpath(":".join(python_path)),
