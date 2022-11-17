@@ -1,7 +1,9 @@
-import git
 import os
+
+import git
 import pytest
 
+from pytest_git_selector.errors import UnsupportedArgumentException
 from pytest_git_selector.selector import select_test_files
 from conftest import (
     add_h_small_project_a,
@@ -341,6 +343,48 @@ from conftest import (
             True,
             False,
             True,
+        ),
+        (
+            "small_project_a",
+            "..",
+            rename_f_small_project_a,
+            ["--diff-filter", "R", "HEAD~1..."],
+            ["test"],
+            ["."],
+            ".",
+            [],
+            UnsupportedArgumentException,
+            False,
+            False,
+            False,
+        ),
+        (
+            "small_project_a",
+            "..",
+            rename_f_small_project_a,
+            ["--diff-filter=R", "HEAD~1..."],
+            ["test"],
+            ["."],
+            ".",
+            [],
+            UnsupportedArgumentException,
+            False,
+            False,
+            False,
+        ),
+        (
+            "small_project_a",
+            "..",
+            rename_f_small_project_a,
+            ["--output", "HEAD~1..."],
+            ["test"],
+            ["."],
+            ".",
+            [],
+            UnsupportedArgumentException,
+            False,
+            False,
+            False,
         ),
     ],
 )
