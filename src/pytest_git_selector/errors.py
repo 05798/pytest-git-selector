@@ -1,0 +1,2 @@
+class UnsupportedArgumentException(ValueError):
+    pass
